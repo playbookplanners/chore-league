@@ -746,7 +746,6 @@ function renderDaySheet(){
       <span class="chore-pts">+${fmtPts(ch.points)}</span>
     `;
     if(editable){
-      li.querySelector('.check-mark').onclick = ()=>toggleChore(ch.id);
       li.style.cursor = 'pointer';
       li.onclick = ()=>{ toggleChore(ch.id); };
     }
