@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Chore League</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Teko:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.2/confetti.browser.min.js"></script>
+<style>
+  :root{
+    --field:#0e3d2b;
+    --field2:#0a3323;
+    --line: rgba(255,255,255,0.10);
+    --navy:#1a2947;
+    --navy-dark:#111b30;
+    --gold:#f7b500;
+    --gold-dark:#c98f00;
+    --red:#e8433a;
+    --chalk:#f4f2ea;
+    --chalk-dim:#d9d5c4;
+    --ink:#15213a;
+    --ink-soft:#5c6478;
+    --white:#ffffff;
+    --shadow: 0 3px 0 rgba(0,0,0,0.25), 0 10px 22px -10px rgba(0,0,0,0.5);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(90deg, var(--line) 0 2px, transparent 2px 64px),
+      repeating-linear-gradient(135deg, var(--field) 0 40px, var(--field2) 40px 80px);
+    color:var(--chalk);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .frame{max-width:920px;margin:0 auto;padding:20px 16px 60px;}
+
+  /* ---------- Header ---------- */
+  header.top{
+    background:var(--navy);
+    border:3px solid var(--navy-dark);
+    border-radius:16px;
+    padding:16px 20px;
+    box-shadow:var(--shadow);
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    margin-bottom:18px;
+    position:relative;
+    overflow:hidden;
+  }
+  header.top::before{
+    content:"";position:absolute;top:-40px;right:-40px;width:140px;height:140px;
+    background:radial-gradient(circle, rgba(247,181,0,0.18), transparent 70%);
+  }
+  .logo-wrap{display:flex;align-items:center;gap:12px;}
+  .ball{
+    width:42px;height:42px;flex:0 0 42px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .ball svg{width:100%;height:100%;}
+  .logo{
+    font-family:'Anton',sans-serif;
+    font-size:2rem;
+    letter-spacing:1px;
+    color:var(--chalk);
+    line-height:1;
+    text-shadow:2px 2px 0 var(--navy-dark);
+  }
+  .logo .accent{color:var(--gold);}
+  .tagline{font-family:'Oswald',sans-serif;font-size:0.8rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--chalk-dim);margin-top:4px;}
+
+  /* ---------- Buttons ---------- */
+  button{font-family:inherit;cursor:pointer;}
+  .btn{
+    border:none;
+    background:var(--chalk);
+    color:var(--ink);
+    padding:9px 16px;
+    border-radius:8px;
+    font-weight:700;
+    font-family:'Oswald',sans-serif;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    font-size:0.8rem;
+    box-shadow:var(--shadow);
+    transition:transform .12s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn:active{transform:translateY(1px);}
+  .btn.primary{background:linear-gradient(180deg, var(--gold), var(--gold-dark));color:var(--navy-dark);}
+  .btn.ghost{background:rgba(255,255,255,0.08);color:var(--chalk);box-shadow:none;border:2px solid rgba(255,255,255,0.25);}
+  .btn.danger{background:var(--red);color:#fff;}
+  .btn.small{padding:6px 12px;font-size:0.72rem;border-radius:6px;}
+  .icon-btn{border:none;background:transparent;font-size:1.1rem;color:var(--ink-soft);padding:4px 8px;border-radius:7px;}
+
+  /* ---------- Kid roster tabs ---------- */
+  .kid-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:stretch;}
+  .kid-tab{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 16px 8px 8px;
+    border-radius:10px;
+    border:2px solid transparent;
+    background:var(--navy);
+    box-shadow:var(--shadow);
+    position:relative;
+  }
+  .kid-tab.active{border-color:var(--gold);}
+  .kid-tab.dim{opacity:0.55;}
+  .kid-tab .jersey{
+    width:34px;height:34px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:800;font-family:'Teko',sans-serif;font-size:1.2rem;
+    box-shadow:inset 0 0 0 2px rgba(255,255,255,0.3);
+  }
+  .kid-tab .kid-name{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:0.85rem;letter-spacing:0.02em;color:var(--chalk);}
+  .kid-tab .pts-chip{font-size:0.7rem;color:var(--gold);font-weight:700;font-family:'Inter';display:block;}
+  .add-kid-tab{
+    display:flex;align-items:center;gap:6px;
+    padding:8px 16px;border-radius:10px;
+    border:2px dashed rgba(255,255,255,0.3);
+    background:transparent;color:var(--chalk-dim);
+    font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:0.8rem;letter-spacing:0.02em;
+  }
+  .add-kid-tab:hover{border-color:var(--gold);color:var(--gold);}
+
+  /* ---------- Scoreboard strip ---------- */
+  .bank-strip{
+    background:var(--navy);
+    border:3px solid var(--navy-dark);
+    border-radius:16px;
+    padding:16px 20px;margin-bottom:20px;box-shadow:var(--shadow);
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;
+  }
+  .bank-strip .who{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;font-size:0.85rem;color:var(--chalk-dim);}
+  .scoreboard{
+    background:#050d1a;
+    border-radius:8px;
+    padding:8px 16px;
+    box-shadow:inset 0 0 0 2px rgba(255,255,255,0.06);
+    display:inline-block;
+    margin-top:4px;
+  }
+  .scoreboard .digits{
+    font-family:'Teko',sans-serif;font-weight:700;font-size:2.4rem;
+    color:var(--gold);letter-spacing:0.02em;line-height:1;
+    text-shadow:0 0 10px rgba(247,181,0,0.5);
+  }
+  .bank-strip .sub{font-size:0.75rem;color:var(--chalk-dim);margin-top:2px;font-family:'Inter';}
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+  .month-nav{display:flex;align-items:center;gap:10px;}
+  .month-title{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;font-size:1.1rem;min-width:190px;text-align:center;color:var(--chalk);}
+  .nav-btn{border:none;background:var(--navy);color:var(--chalk);border-radius:8px;width:32px;height:32px;font-weight:800;box-shadow:var(--shadow);}
+
+  /* ---------- Schedule / calendar ---------- */
+  .cal-card{
+    background:var(--chalk);
+    background-image: repeating-linear-gradient(0deg, rgba(26,41,71,0.05) 0 2px, transparent 2px 46px);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+    padding:16px;
+    margin-bottom:26px;
+    position:relative;
+    overflow:hidden;
+  }
+  .cal-card::before{
+    content:"SCHEDULE";
+    position:absolute;top:8px;right:-30px;
+    font-family:'Anton',sans-serif;font-size:3.4rem;color:rgba(26,41,71,0.04);
+    letter-spacing:0.05em;pointer-events:none;transform:rotate(0deg);
+  }
+  .dow-row{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:8px;position:relative;}
+  .dow{text-align:center;font-size:0.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.08em;font-family:'Anton',sans-serif;padding-bottom:6px;border-bottom:3px solid var(--gold);}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;position:relative;}
+  .day-cell{
+    aspect-ratio:1/0.95;
+    border-radius:10px;
+    border:2px solid var(--navy);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:2px;
+    cursor:pointer;
+    position:relative;
+    background:#fff;
+    box-shadow:0 3px 0 var(--navy);
+    transition:transform .12s ease, box-shadow .12s ease, background .15s ease;
+  }
+  .day-cell:hover{transform:translateY(-2px);box-shadow:0 5px 0 var(--navy);background:#fff8e0;}
+  .day-cell:active{transform:translateY(1px);box-shadow:0 1px 0 var(--navy);}
+  .day-cell.empty{visibility:hidden;cursor:default;box-shadow:none;border:none;}
+  .day-cell .num{font-size:1rem;font-weight:700;color:var(--ink);font-family:'Teko',sans-serif;line-height:1;}
+  .day-cell.today{border-color:var(--red);box-shadow:0 3px 0 var(--red);}
+  .day-cell.today:hover{box-shadow:0 5px 0 var(--red);}
+  .day-cell.today .num{color:var(--red);}
+  .day-cell.played{border-color:var(--gold-dark);}
+  .day-cell .win-ribbon{
+    position:absolute;top:-2px;right:-2px;
+    font-family:'Anton',sans-serif;font-size:0.6rem;letter-spacing:0.02em;
+    padding:2px 8px 2px 9px;color:var(--navy-dark);
+    background:linear-gradient(180deg, var(--gold), var(--gold-dark));
+    border-radius:0 8px 0 8px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.3);
+  }
+  .day-cell.future{opacity:0.45;box-shadow:0 2px 0 var(--chalk-dim);border-color:var(--chalk-dim);}
+  .day-cell.future:hover{transform:none;box-shadow:0 2px 0 var(--chalk-dim);background:#fff;}
+  .day-cell .progress{font-size:0.58rem;font-weight:700;color:var(--ink-soft);font-family:'Oswald',sans-serif;letter-spacing:0.02em;}
+  .day-cell .dot{width:7px;height:7px;border-radius:50%;background:var(--chalk-dim);}
+
+  .backup-banner{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    background:linear-gradient(90deg, var(--gold), var(--gold-dark));
+    color:var(--navy-dark);border-radius:12px;padding:11px 16px;margin-bottom:18px;
+    box-shadow:var(--shadow);
+  }
+  .backup-banner .msg{font-family:'Oswald',sans-serif;font-weight:700;font-size:0.82rem;text-transform:uppercase;letter-spacing:0.02em;}
+  .backup-banner .actions{display:flex;gap:8px;align-items:center;}
+
+  /* ---------- Parent PIN ---------- */
+  .pin-input{
+    width:100%;text-align:center;font-family:'Teko',sans-serif;font-size:2rem;
+    letter-spacing:0.5em;padding:12px 10px 10px 16px;border-radius:10px;
+    border:2px solid var(--chalk-dim);margin-bottom:10px;
+  }
+  .pin-error{color:var(--red);font-size:0.8rem;font-weight:700;text-align:center;min-height:1.2em;margin-bottom:6px;font-family:'Oswald',sans-serif;}
+  .pin-hint{font-size:0.78rem;color:var(--ink-soft);text-align:center;margin-bottom:14px;}
+  .lock-status-note{font-size:0.78rem;color:var(--ink-soft);margin-top:8px;}
+
+  /* ---------- Empty state ---------- */
+  .empty-state{
+    text-align:center;padding:50px 20px;color:var(--chalk-dim);
+    font-family:'Oswald',sans-serif;font-size:1.1rem;text-transform:uppercase;letter-spacing:0.03em;
+  }
+
+  /* ---------- Modal / overlay ---------- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(4,10,20,0.6);
+    display:flex;align-items:flex-end;justify-content:center;
+    z-index:50;opacity:0;pointer-events:none;transition:opacity .18s ease;
+  }
+  .overlay.open{opacity:1;pointer-events:auto;}
+  @media (min-width:640px){ .overlay{align-items:center;} }
+  .sheet{
+    background:var(--chalk);color:var(--ink);
+    width:100%;max-width:520px;
+    border-radius:18px 18px 0 0;
+    max-height:88vh;overflow-y:auto;
+    padding:20px 20px 26px;
+    transform:translateY(20px);
+    transition:transform .2s ease;
+    border-top:4px solid var(--gold);
+  }
+  @media (min-width:640px){ .sheet{border-radius:16px;} }
+  .overlay.open .sheet{transform:translateY(0);}
+  .sheet-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:10px;}
+  .sheet-title{font-family:'Anton',sans-serif;font-size:1.4rem;letter-spacing:0.02em;color:var(--navy);}
+  .sheet-sub{font-size:0.8rem;color:var(--ink-soft);margin-top:2px;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.02em;}
+  .close-x{border:none;background:transparent;font-size:1.3rem;color:var(--ink-soft);cursor:pointer;line-height:1;padding:4px;}
+
+  /* ---------- Lineup / chore checklist ---------- */
+  .lineup-label{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;font-size:0.72rem;color:var(--ink-soft);margin:0 0 8px;}
+  .chore-list{list-style:none;margin:0 0 14px;padding:0;display:flex;flex-direction:column;gap:8px;}
+  .chore-row{
+    display:flex;align-items:center;gap:12px;
+    padding:10px 12px;border-radius:10px;border:1.5px solid var(--chalk-dim);
+    background:#fff;
+  }
+  .chore-row.checked{background:#fff6de;border-color:var(--gold);}
+  .check-mark{
+    width:28px;height:28px;flex:0 0 28px;border-radius:6px;
+    border:2.5px solid var(--chalk-dim);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;background:#fff;
+  }
+  .chore-row.checked .check-mark{border-color:var(--gold-dark);background:linear-gradient(180deg, var(--gold), var(--gold-dark));}
+  .check-mark svg{width:16px;height:16px;display:none;}
+  .chore-row.checked .check-mark svg{display:block;}
+  .chore-name{flex:1;font-weight:600;font-size:0.92rem;}
+  .chore-row.checked .chore-name{color:var(--navy);}
+  .chore-pts{font-family:'Teko',sans-serif;font-weight:700;color:var(--ink-soft);font-size:1.05rem;}
+  .chore-row.checked .chore-pts{color:var(--gold-dark);}
+  .chore-del{border:none;background:transparent;color:var(--chalk-dim);font-size:0.9rem;cursor:pointer;padding:2px 6px;}
+  .chore-del:hover{color:var(--red);}
+
+  .add-chore-form{display:flex;gap:8px;margin-bottom:16px;}
+  .add-chore-form input[type=text]{flex:1;}
+  .add-chore-form input[type=number]{width:72px;}
+  input[type=text], input[type=number]{
+    border:1.5px solid var(--chalk-dim);border-radius:7px;padding:8px 10px;
+    font-family:'Inter';font-size:0.85rem;background:#fff;color:var(--ink);
+  }
+  input:focus{outline:2px solid var(--gold-dark);outline-offset:1px;}
+
+  .pending-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 14px;border-radius:10px;background:var(--navy);
+    margin-bottom:14px;
+  }
+  .pending-bar .lbl{font-size:0.72rem;color:var(--chalk-dim);font-weight:700;text-transform:uppercase;letter-spacing:0.04em;font-family:'Oswald',sans-serif;}
+  .pending-bar .val{font-family:'Teko',sans-serif;font-weight:700;font-size:1.7rem;color:var(--gold);}
+
+  .approved-badge{
+    display:flex;align-items:center;gap:8px;
+    background:var(--navy);color:var(--gold);
+    padding:10px 14px;border-radius:10px;font-weight:700;font-size:0.85rem;margin-bottom:12px;
+    font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.03em;
+  }
+
+  /* ---------- Kid jersey color swatches ---------- */
+  .swatch-row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 16px;}
+  .swatch{width:32px;height:32px;border-radius:8px;cursor:pointer;border:3px solid transparent;}
+  .swatch.selected{border-color:var(--navy);}
+
+  /* ---------- History / play-by-play ---------- */
+  .history-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;}
+  .history-row{display:flex;justify-content:space-between;align-items:center;padding:9px 11px;border-radius:8px;background:#fff;border:1.5px solid var(--chalk-dim);font-size:0.8rem;}
+  .history-row .note{color:var(--ink);}
+  .history-row .date{color:var(--ink-soft);font-size:0.7rem;display:block;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.02em;}
+  .history-row .delta{font-weight:800;font-family:'Teko',sans-serif;font-size:1.1rem;}
+  .delta.pos{color:var(--gold-dark);}
+  .delta.neg{color:var(--red);}
+
+  .adjust-form{display:flex;gap:8px;margin:12px 0;align-items:center;flex-wrap:wrap;}
+  .adjust-form input[type=number]{width:80px;}
+  .adjust-form input[type=text]{flex:1;min-width:140px;}
+
+  .footer-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap;}
+
+  .field-label{font-size:0.72rem;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;display:block;font-family:'Oswald',sans-serif;}
+
+  .toast{
+    position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--navy);color:var(--gold);padding:10px 18px;border-radius:999px;
+    font-size:0.85rem;font-weight:700;opacity:0;pointer-events:none;
+    transition:all .25s ease;z-index:80;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:0.03em;
+    box-shadow:var(--shadow);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .settings-section{margin-bottom:18px;}
+  .settings-section h4{font-family:'Oswald',sans-serif;font-size:0.9rem;margin:0 0 8px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.04em;}
+
+  .kid-manage-row{display:flex;align-items:center;gap:10px;padding:8px 4px;}
+  .kid-manage-row .jersey{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-family:'Teko';font-size:1rem;}
+  .kid-manage-row .name{flex:1;font-weight:600;font-size:0.88rem;}
+
+  @media (max-width:480px){
+    .logo{font-size:1.5rem;}
+    .day-cell .num{font-size:0.72rem;}
+    .cal-card{padding:10px;}
+    .scoreboard .digits{font-size:2rem;}
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <header class="top">
+    <div class="logo-wrap">
+      <div class="ball">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 8h18v10a9 9 0 0 1-18 0V8z" fill="url(#trophyGrad)" stroke="#c98f00" stroke-width="1.5"/>
+          <path d="M15 10H9a5 5 0 0 0 5 8" stroke="#c98f00" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M33 10h6a5 5 0 0 1-5 8" stroke="#c98f00" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <rect x="21" y="26" width="6" height="7" fill="#e0a300"/>
+          <path d="M13 40h22l-2-6H15l-2 6z" fill="url(#trophyGrad)" stroke="#c98f00" stroke-width="1.5"/>
+          <rect x="17" y="33" width="14" height="4" fill="#e0a300"/>
+          <defs>
+            <linearGradient id="trophyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffe17a"/>
+              <stop offset="1" stop-color="#f7b500"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div>
+        <div class="logo">CHORE <span class="accent">LEAGUE</span></div>
+        <div class="tagline">No nagging. No excuses. Get in the game.</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn ghost" id="lockBtn" title="Parent lock">🔒</button>
+      <button class="btn ghost" id="settingsBtn">⚙ Playbook</button>
+    </div>
+  </header>
+
+  <div class="kid-row" id="kidRow"></div>
+
+  <div id="mainArea"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Day sheet -->
+<div class="overlay" id="dayOverlay">
+  <div class="sheet" id="daySheet"></div>
+</div>
+
+<!-- Add kid sheet -->
+<div class="overlay" id="kidOverlay">
+  <div class="sheet" id="kidSheet"></div>
+</div>
+
+<!-- Bank sheet -->
+<div class="overlay" id="bankOverlay">
+  <div class="sheet" id="bankSheet"></div>
+</div>
+
+<!-- Settings sheet -->
+<div class="overlay" id="settingsOverlay">
+  <div class="sheet" id="settingsSheet"></div>
+</div>
+
+<!-- Parent PIN sheet -->
+<div class="overlay" id="pinOverlay">
+  <div class="sheet" id="pinSheet"></div>
+</div>
+
+<script>
+const KID_COLORS = ['#1a2947','#e8433a','#f7b500','#1f7a4d','#6b3fa0','#0e7c86','#e2711d'];
+const POINT_VALUE = 0.5; // dollars per point
+const STORAGE_KEY = 'family-chore-state-league';
+
+const DEFAULT_CHORES = [
+  {name:'Eat healthy w/ no fight', points:2},
+  {name:'Sleep in own bed', points:2},
+  {name:'Wake up with no fighting (school)', points:2},
+  {name:'Workout', points:2},
+  {name:'No extra blanket', points:3},
+  {name:'Make bed', points:1},
+  {name:'Pick up clothes', points:1},
+  {name:'Clean room', points:3},
+  {name:'Dust', points:0.5},
+  {name:'Feed dog', points:0.5},
+  {name:'Wash dishes', points:0.5},
+  {name:'Take out garbage', points:0.5},
+  {name:'Read', points:0.5},
+];
+
+let state = null;
+let currentKidId = null;
+let calMonth = new Date().getMonth();
+let calYear = new Date().getFullYear();
+let activeDayStr = null;
+
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function todayStr(){ return fmtDate(new Date()); }
+function fmtDate(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function niceDate(str){
+  const [y,m,d] = str.split('-').map(Number);
+  const dt = new Date(y,m-1,d);
+  return dt.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
+}
+function shortDate(str){
+  const [y,m,d] = str.split('-').map(Number);
+  const dt = new Date(y,m-1,d);
+  return dt.toLocaleDateString(undefined,{month:'short', day:'numeric'});
+}
+function fmtPts(p){
+  return (Math.round(p*10)/10).toString().replace(/\.0$/,'');
+}
+function fmtMoney(pts){
+  return '$' + (pts*POINT_VALUE).toFixed(2);
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+function defaultState(){
+  return { kids: [], chores: DEFAULT_CHORES.map(c=>({id:uid(), name:c.name, points:c.points})), bank:{}, days:{}, meta:{approvalsSinceBackup:0, lastBackupAt:null, parentPin:null} };
+}
+
+const BACKUP_REMINDER_THRESHOLD = 5;
+let bannerDismissed = false;
+let parentUnlocked = false;
+
+async function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      state = JSON.parse(raw);
+      if(!state.chores || !state.chores.length){ state.chores = DEFAULT_CHORES.map(c=>({id:uid(),name:c.name,points:c.points})); }
+      if(!state.kids) state.kids = [];
+      if(!state.bank) state.bank = {};
+      if(!state.days) state.days = {};
+      if(!state.meta) state.meta = {approvalsSinceBackup:0, lastBackupAt:null, parentPin:null};
+      if(state.meta.parentPin===undefined) state.meta.parentPin=null;
+    } else {
+      state = defaultState();
+    }
+  }catch(e){
+    console.error('load failed', e);
+    state = defaultState();
+  }
+  if(state.kids.length && !currentKidId){ currentKidId = state.kids[0].id; }
+  updateLockIndicator();
+  render();
+}
+
+async function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){
+    console.error('save failed', e);
+    showToast("Couldn't save — try again");
+  }
+}
+
+function ensureKidData(kidId){
+  if(!state.bank[kidId]) state.bank[kidId] = {total:0, history:[]};
+  if(!state.days[kidId]) state.days[kidId] = {};
+}
+
+function getKid(id){ return state.kids.find(k=>k.id===id); }
+function jerseyNum(id){ const i = state.kids.findIndex(k=>k.id===id); return i>=0? i+1 : 1; }
+
+/* ---------------- RENDER ---------------- */
+function render(){
+  renderKidRow();
+  renderMain();
+}
+
+function renderKidRow(){
+  const row = document.getElementById('kidRow');
+  row.innerHTML = '';
+  state.kids.forEach(k=>{
+    ensureKidData(k.id);
+    const btn = document.createElement('button');
+    btn.className = 'kid-tab' + (k.id===currentKidId?' active':' dim');
+    btn.innerHTML = `<span class="jersey" style="background:${k.color}">${jerseyNum(k.id)}</span>
+      <span>
+        <span class="kid-name">${escapeHtml(k.name)}</span>
+        <span class="pts-chip">${fmtPts(state.bank[k.id].total)} PTS</span>
+      </span>`;
+    btn.onclick = ()=>{ currentKidId = k.id; render(); };
+    row.appendChild(btn);
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-kid-tab';
+  addBtn.innerHTML = '+ Add player';
+  addBtn.onclick = openAddKid;
+  row.appendChild(addBtn);
+}
+
+function renderMain(){
+  const main = document.getElementById('mainArea');
+  if(!state.kids.length){
+    main.innerHTML = `<div class="empty-state">No players on the roster yet.<br><br><button class="btn primary" onclick="openAddKid()">+ Add your first player</button></div>`;
+    return;
+  }
+  const kid = getKid(currentKidId) || state.kids[0];
+  currentKidId = kid.id;
+  ensureKidData(kid.id);
+  const bank = state.bank[kid.id];
+
+  const overdue = !bannerDismissed && state.meta && (state.meta.approvalsSinceBackup||0) >= BACKUP_REMINDER_THRESHOLD;
+
+  main.innerHTML = `
+    ${overdue ? `
+    <div class="backup-banner">
+      <span class="msg">🔔 It's been a while since your last backup — don't lose these points</span>
+      <span class="actions">
+        <button class="btn small" id="bannerExportBtn">⬇ Export now</button>
+        <button class="icon-btn" id="bannerDismissBtn" title="Dismiss">✕</button>
+      </span>
+    </div>` : ''}
+    <div class="bank-strip">
+      <div>
+        <div class="who">${escapeHtml(kid.name)} — Season Stats</div>
+        <div class="scoreboard"><div class="digits">${fmtPts(bank.total)}</div></div>
+        <div class="sub">${fmtMoney(bank.total)} banked</div>
+      </div>
+      <div>
+        <button class="btn small ghost" id="openBankBtn">View stats</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="month-nav">
+        <button class="nav-btn" id="prevMonth">‹</button>
+        <div class="month-title" id="monthTitle"></div>
+        <button class="nav-btn" id="nextMonth">›</button>
+      </div>
+      <button class="btn small ghost" id="todayBtn">Today</button>
+    </div>
+
+    <div class="cal-card">
+      <div class="dow-row">${['S','M','T','W','T','F','S'].map(d=>`<div class="dow">${d}</div>`).join('')}</div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+  `;
+
+  if(overdue){
+    document.getElementById('bannerExportBtn').onclick = ()=>{ exportBackup(); render(); };
+    document.getElementById('bannerDismissBtn').onclick = ()=>{ bannerDismissed = true; render(); };
+  }
+
+  document.getElementById('openBankBtn').onclick = ()=>requirePin(()=>openBank(kid.id));
+  document.getElementById('prevMonth').onclick = ()=>{ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderMain(); };
+  document.getElementById('nextMonth').onclick = ()=>{ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderMain(); };
+  document.getElementById('todayBtn').onclick = ()=>{ const n=new Date(); calMonth=n.getMonth(); calYear=n.getFullYear(); renderMain(); };
+
+  renderCalendar(kid);
+}
+
+function renderCalendar(kid){
+  const grid = document.getElementById('calGrid');
+  const monthTitle = document.getElementById('monthTitle');
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  monthTitle.textContent = monthNames[calMonth] + ' ' + calYear;
+
+  grid.innerHTML = '';
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const today = todayStr();
+
+  for(let i=0;i<firstDay;i++){
+    const c = document.createElement('div');
+    c.className = 'day-cell empty';
+    grid.appendChild(c);
+  }
+
+  const kidDays = state.days[kid.id] || {};
+
+  for(let d=1; d<=daysInMonth; d++){
+    const dt = new Date(calYear, calMonth, d);
+    const dstr = fmtDate(dt);
+    const cell = document.createElement('div');
+    cell.className = 'day-cell';
+    if(dstr === today) cell.classList.add('today');
+    if(dstr > today) cell.classList.add('future');
+
+    const rec = kidDays[dstr];
+    let inner = `<div class="num">${d}</div>`;
+    if(rec && rec.approved){
+      cell.classList.add('played');
+      const pts = rec.checked.reduce((sum,cid)=>{
+        const ch = state.chores.find(c=>c.id===cid);
+        return sum + (ch?ch.points:0);
+      },0);
+      inner += `<div class="win-ribbon">W ${fmtPts(pts)}</div>`;
+    } else if(rec && rec.checked && rec.checked.length){
+      inner += `<div class="progress" style="color:${kid.color}">${rec.checked.length}/${state.chores.length}</div>`;
+    } else {
+      inner += `<div class="dot"></div>`;
+    }
+    cell.innerHTML = inner;
+    cell.onclick = ()=>openDay(kid.id, dstr);
+    grid.appendChild(cell);
+  }
+}
+
+/* ---------------- DAY SHEET ---------------- */
+function openDay(kidId, dstr){
+  activeDayStr = dstr;
+  currentKidId = kidId;
+  const overlay = document.getElementById('dayOverlay');
+  overlay.classList.add('open');
+  renderDaySheet();
+  overlay.onclick = (e)=>{ if(e.target===overlay) closeOverlay('dayOverlay'); };
+}
+
+function renderDaySheet(){
+  const kid = getKid(currentKidId);
+  ensureKidData(kid.id);
+  if(!state.days[kid.id][activeDayStr]){
+    state.days[kid.id][activeDayStr] = {checked:[], approved:false};
+  }
+  const rec = state.days[kid.id][activeDayStr];
+  const sheet = document.getElementById('daySheet');
+
+  const pendingPts = rec.checked.reduce((s,cid)=>{
+    const ch = state.chores.find(c=>c.id===cid);
+    return s + (ch?ch.points:0);
+  },0);
+
+  sheet.innerHTML = `
+    <div class="sheet-head">
+      <div>
+        <div class="sheet-title">GAME DAY</div>
+        <div class="sheet-sub">${niceDate(activeDayStr)} &middot; ${escapeHtml(kid.name)}</div>
+      </div>
+      <button class="close-x" onclick="closeOverlay('dayOverlay')">✕</button>
+    </div>
+
+    ${rec.approved ? `<div class="approved-badge">🏆 Final score locked in &mdash; points on the board</div>` : ''}
+
+    <div class="lineup-label">Starting Lineup</div>
+    <ul class="chore-list" id="choreList"></ul>
+
+    <div class="add-chore-form">
+      <input type="text" id="newChoreName" placeholder="New play (e.g. Set the table)" maxlength="60">
+      <input type="number" id="newChorePts" placeholder="pts" step="0.5" min="0">
+      <button class="btn small" id="addChoreBtn">Add</button>
+    </div>
+
+    <div class="pending-bar">
+      <span class="lbl">${rec.approved ? 'Final score' : 'Current score'}</span>
+      <span class="val">+${fmtPts(pendingPts)}</span>
+    </div>
+
+    <div class="footer-actions">
+      ${rec.approved
+        ? `<button class="btn ghost" id="reopenBtn">Reopen game</button>`
+        : `<button class="btn primary" id="approveBtn">🏆 Lock In The Win</button>`}
+    </div>
+  `;
+
+  const list = document.getElementById('choreList');
+  state.chores.forEach(ch=>{
+    const checked = rec.checked.includes(ch.id);
+    const li = document.createElement('li');
+    li.className = 'chore-row' + (checked?' checked':'');
+    li.innerHTML = `
+      <span class="check-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"></polyline></svg>
+      </span>
+      <span class="chore-name">${escapeHtml(ch.name)}</span>
+      <span class="chore-pts">+${fmtPts(ch.points)}</span>
+    `;
+    if(!rec.approved){
+      li.querySelector('.check-mark').onclick = ()=>toggleChore(ch.id);
+      li.style.cursor = 'pointer';
+      li.onclick = ()=>{ toggleChore(ch.id); };
+    }
+    list.appendChild(li);
+  });
+
+  if(!rec.approved){
+    document.getElementById('addChoreBtn').onclick = addChoreFromDay;
+    document.getElementById('approveBtn').onclick = ()=>requirePin(approveDay);
+  } else {
+    document.getElementById('reopenBtn').onclick = ()=>requirePin(reopenDay);
+  }
+}
+
+function toggleChore(choreId){
+  const kid = getKid(currentKidId);
+  const rec = state.days[kid.id][activeDayStr];
+  if(rec.approved) return;
+  const idx = rec.checked.indexOf(choreId);
+  if(idx>=0) rec.checked.splice(idx,1); else rec.checked.push(choreId);
+  saveState();
+  renderDaySheet();
+  renderMain();
+}
+
+function addChoreFromDay(){
+  const nameInput = document.getElementById('newChoreName');
+  const ptsInput = document.getElementById('newChorePts');
+  const name = nameInput.value.trim();
+  const pts = parseFloat(ptsInput.value);
+  if(!name){ showToast('Give the play a name'); return; }
+  if(isNaN(pts) || pts<0){ showToast('Enter a point value'); return; }
+  state.chores.push({id:uid(), name, points:pts});
+  saveState();
+  showToast(`Added "${name}" to the playbook`);
+  renderDaySheet();
+}
+
+function approveDay(){
+  const kid = getKid(currentKidId);
+  const rec = state.days[kid.id][activeDayStr];
+  const pts = rec.checked.reduce((s,cid)=>{
+    const ch = state.chores.find(c=>c.id===cid);
+    return s + (ch?ch.points:0);
+  },0);
+  rec.approved = true;
+  ensureKidData(kid.id);
+  state.bank[kid.id].total += pts;
+  state.bank[kid.id].history.unshift({id:uid(), date:activeDayStr, delta:pts, note:'Game won', type:'approval'});
+  if(!state.meta) state.meta = {approvalsSinceBackup:0, lastBackupAt:null, parentPin:null};
+      if(state.meta.parentPin===undefined) state.meta.parentPin=null;
+  state.meta.approvalsSinceBackup = (state.meta.approvalsSinceBackup||0) + 1;
+  saveState();
+  fireConfetti(kid.color);
+  renderDaySheet();
+  render();
+}
+
+function reopenDay(){
+  const kid = getKid(currentKidId);
+  const rec = state.days[kid.id][activeDayStr];
+  const pts = rec.checked.reduce((s,cid)=>{
+    const ch = state.chores.find(c=>c.id===cid);
+    return s + (ch?ch.points:0);
+  },0);
+  rec.approved = false;
+  state.bank[kid.id].total -= pts;
+  state.bank[kid.id].history.unshift({id:uid(), date:activeDayStr, delta:-pts, note:'Game reopened', type:'approval'});
+  saveState();
+  renderDaySheet();
+  render();
+}
+
+function fireConfetti(color){
+  if(typeof confetti !== 'function') return;
+  const colors = [color, '#f7b500', '#e8433a', '#ffffff', '#1a2947'];
+  confetti({ particleCount: 130, spread: 85, origin: {y:0.6}, colors, scalar:1.1 });
+  setTimeout(()=>confetti({ particleCount: 70, spread: 110, origin:{y:0.7}, colors }), 200);
+}
+
+/* ---------------- ADD KID ---------------- */
+function openAddKid(){
+  const overlay = document.getElementById('kidOverlay');
+  overlay.classList.add('open');
+  const usedColors = state.kids.map(k=>k.color);
+  const firstFree = KID_COLORS.find(c=>!usedColors.includes(c)) || KID_COLORS[0];
+  const sheet = document.getElementById('kidSheet');
+  sheet.innerHTML = `
+    <div class="sheet-head">
+      <div class="sheet-title">ADD PLAYER</div>
+      <button class="close-x" onclick="closeOverlay('kidOverlay')">✕</button>
+    </div>
+    <span class="field-label">Name</span>
+    <input type="text" id="kidNameInput" placeholder="e.g. Max" style="width:100%;margin-bottom:14px;" maxlength="24">
+    <span class="field-label">Jersey color</span>
+    <div class="swatch-row" id="swatchRow"></div>
+    <div class="footer-actions">
+      <button class="btn primary" id="saveKidBtn">Add to roster</button>
+    </div>
+  `;
+  let selected = firstFree;
+  const swatchRow = document.getElementById('swatchRow');
+  KID_COLORS.forEach(c=>{
+    const sw = document.createElement('div');
+    sw.className = 'swatch' + (c===selected?' selected':'');
+    sw.style.background = c;
+    sw.onclick = ()=>{ selected=c; [...swatchRow.children].forEach(s=>s.classList.remove('selected')); sw.classList.add('selected'); };
+    swatchRow.appendChild(sw);
+  });
+  document.getElementById('saveKidBtn').onclick = ()=>{
+    const name = document.getElementById('kidNameInput').value.trim();
+    if(!name){ showToast('Give this player a name'); return; }
+    const id = uid();
+    state.kids.push({id, name, color:selected});
+    state.bank[id] = {total:0, history:[]};
+    state.days[id] = {};
+    currentKidId = id;
+    saveState();
+    closeOverlay('kidOverlay');
+    render();
+    showToast(`${name} joins the team!`);
+  };
+  overlay.onclick = (e)=>{ if(e.target===overlay) closeOverlay('kidOverlay'); };
+}
+
+/* ---------------- BANK SHEET ---------------- */
+function openBank(kidId){
+  currentKidId = kidId;
+  const overlay = document.getElementById('bankOverlay');
+  overlay.classList.add('open');
+  renderBankSheet();
+  overlay.onclick = (e)=>{ if(e.target===overlay) closeOverlay('bankOverlay'); };
+}
+
+function renderBankSheet(){
+  const kid = getKid(currentKidId);
+  ensureKidData(kid.id);
+  const bank = state.bank[kid.id];
+  const sheet = document.getElementById('bankSheet');
+  sheet.innerHTML = `
+    <div class="sheet-head">
+      <div>
+        <div class="sheet-title">SEASON STATS</div>
+        <div class="sheet-sub">${escapeHtml(kid.name)} &middot; ${fmtPts(bank.total)} pts &middot; ${fmtMoney(bank.total)}</div>
+      </div>
+      <button class="close-x" onclick="closeOverlay('bankOverlay')">✕</button>
+    </div>
+
+    <span class="field-label">Bonus play (add or remove points)</span>
+    <div class="adjust-form">
+      <input type="number" id="adjustPts" placeholder="e.g. -2 or 3" step="0.5">
+      <input type="text" id="adjustNote" placeholder="Reason (e.g. left towel on floor)" maxlength="60">
+      <button class="btn small primary" id="adjustBtn">Apply</button>
+    </div>
+
+    <span class="field-label">Play-by-play</span>
+    <ul class="history-list" id="historyList"></ul>
+  `;
+  const list = document.getElementById('historyList');
+  if(!bank.history.length){
+    list.innerHTML = `<div style="color:var(--ink-soft);font-size:0.85rem;padding:8px 2px;">No plays yet — get on the board!</div>`;
+  } else {
+    bank.history.forEach(h=>{
+      const row = document.createElement('li');
+      row.className = 'history-row';
+      const isManual = h.type === 'manual' || (h.type===undefined && h.note!=='Game won' && h.note!=='Game reopened');
+      row.innerHTML = `
+        <span class="note">${escapeHtml(h.note)}<span class="date">${shortDate(h.date)}</span></span>
+        <span style="display:flex;align-items:center;gap:8px;">
+          <span class="delta ${h.delta>=0?'pos':'neg'}">${h.delta>=0?'+':''}${fmtPts(h.delta)}</span>
+          ${isManual ? `<button class="chore-del undo-entry-btn" data-id="${h.id}" title="Undo this entry">🗑</button>` : ''}
+        </span>
+      `;
+      list.appendChild(row);
+    });
+    list.querySelectorAll('.undo-entry-btn').forEach(btn=>{
+      btn.onclick = ()=>undoHistoryEntry(btn.dataset.id);
+    });
+  }
+  document.getElementById('adjustBtn').onclick = ()=>{
+    const val = parseFloat(document.getElementById('adjustPts').value);
+    const note = document.getElementById('adjustNote').value.trim() || (val>=0?'Bonus points':'Penalty');
+    if(isNaN(val) || val===0){ showToast('Enter a point amount'); return; }
+    bank.total += val;
+    bank.history.unshift({id:uid(), date: todayStr(), delta: val, note, type:'manual'});
+    saveState();
+    renderBankSheet();
+    render();
+    showToast(val>0?'Points added':'Points removed');
+  };
+}
+
+function undoHistoryEntry(entryId){
+  const kid = getKid(currentKidId);
+  ensureKidData(kid.id);
+  const bank = state.bank[kid.id];
+  const entry = bank.history.find(h=>h.id===entryId);
+  if(!entry) return;
+  if(!confirm(`Undo "${entry.note}" (${entry.delta>=0?'+':''}${fmtPts(entry.delta)})? This removes it from the total and the log.`)) return;
+  bank.total -= entry.delta;
+  bank.history = bank.history.filter(h=>h.id!==entryId);
+  saveState();
+  renderBankSheet();
+  render();
+  showToast('Entry undone');
+}
+
+/* ---------------- SETTINGS SHEET (playbook + roster) ---------------- */
+document.getElementById('settingsBtn').onclick = ()=>requirePin(openSettings);
+function openSettings(){
+  const overlay = document.getElementById('settingsOverlay');
+  overlay.classList.add('open');
+  renderSettingsSheet();
+  overlay.onclick = (e)=>{ if(e.target===overlay) closeOverlay('settingsOverlay'); };
+}
+
+function renderSettingsSheet(){
+  const sheet = document.getElementById('settingsSheet');
+  sheet.innerHTML = `
+    <div class="sheet-head">
+      <div class="sheet-title">TEAM SETTINGS</div>
+      <button class="close-x" onclick="closeOverlay('settingsOverlay')">✕</button>
+    </div>
+
+    <div class="settings-section">
+      <h4>Playbook (chores &amp; points)</h4>
+      <ul class="chore-list" id="settingsChoreList"></ul>
+      <div class="add-chore-form">
+        <input type="text" id="settingsNewName" placeholder="New chore name" maxlength="60">
+        <input type="number" id="settingsNewPts" placeholder="pts" step="0.5" min="0">
+        <button class="btn small" id="settingsAddBtn">Add</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h4>Roster</h4>
+      <div id="settingsKidList"></div>
+      <button class="btn small ghost" id="settingsAddKidBtn" style="margin-top:6px;">+ Add player</button>
+    </div>
+
+    <div class="settings-section">
+      <h4>Parent lock</h4>
+      <div class="sheet-sub" style="margin-bottom:10px;">${state.meta && state.meta.parentPin ? 'A PIN protects Season Stats, approvals, and this settings screen.' : 'No PIN set yet — anyone can approve days and adjust points.'}</div>
+      <button class="btn small ghost" id="changePinBtn">${state.meta && state.meta.parentPin ? '🔑 Change PIN' : '🔑 Set PIN'}</button>
+    </div>
+
+    <div class="settings-section">
+      <h4>Backup</h4>
+      <div class="sheet-sub" style="margin-bottom:10px;">Points live in this browser only. Export a backup after big wins, and import it if you ever switch devices or clear browser data.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn small primary" id="exportBtn">⬇ Export backup</button>
+        <button class="btn small ghost" id="importBtn">⬆ Import backup</button>
+        <input type="file" id="importFile" accept="application/json" style="display:none;">
+      </div>
+    </div>
+  `;
+
+  document.getElementById('changePinBtn').onclick = ()=>{
+    closeOverlay('settingsOverlay');
+    openPinSheet('setup', ()=>requirePin(openSettings));
+  };
+
+  const choreList = document.getElementById('settingsChoreList');
+  state.chores.forEach(ch=>{
+    const li = document.createElement('li');
+    li.className = 'chore-row';
+    li.innerHTML = `
+      <span class="chore-name">${escapeHtml(ch.name)}</span>
+      <input type="number" step="0.5" min="0" value="${ch.points}" style="width:60px;" class="pts-edit">
+      <button class="chore-del" title="Delete chore">🗑</button>
+    `;
+    const ptsEdit = li.querySelector('.pts-edit');
+    ptsEdit.onchange = ()=>{
+      const v = parseFloat(ptsEdit.value);
+      if(!isNaN(v) && v>=0){ ch.points = v; saveState(); render(); showToast('Points updated'); }
+    };
+    li.querySelector('.chore-del').onclick = ()=>{
+      if(confirm(`Delete "${ch.name}"? This won't change past games.`)){
+        state.chores = state.chores.filter(c=>c.id!==ch.id);
+        saveState();
+        renderSettingsSheet();
+        showToast('Chore removed from playbook');
+      }
+    };
+    choreList.appendChild(li);
+  });
+
+  document.getElementById('settingsAddBtn').onclick = ()=>{
+    const name = document.getElementById('settingsNewName').value.trim();
+    const pts = parseFloat(document.getElementById('settingsNewPts').value);
+    if(!name){ showToast('Give the chore a name'); return; }
+    if(isNaN(pts) || pts<0){ showToast('Enter a point value'); return; }
+    state.chores.push({id:uid(), name, points:pts});
+    saveState();
+    renderSettingsSheet();
+    showToast(`Added "${name}" to the playbook`);
+  };
+
+  const kidList = document.getElementById('settingsKidList');
+  state.kids.forEach(k=>{
+    const row = document.createElement('div');
+    row.className = 'kid-manage-row';
+    row.innerHTML = `
+      <span class="jersey" style="background:${k.color}">${jerseyNum(k.id)}</span>
+      <span class="name">${escapeHtml(k.name)}</span>
+      <button class="chore-del" title="Remove player">🗑</button>
+    `;
+    row.querySelector('.chore-del').onclick = ()=>{
+      if(confirm(`Remove ${k.name} from the roster? Their point history will be lost.`)){
+        state.kids = state.kids.filter(x=>x.id!==k.id);
+        delete state.bank[k.id];
+        delete state.days[k.id];
+        if(currentKidId===k.id) currentKidId = state.kids[0]?.id || null;
+        saveState();
+        renderSettingsSheet();
+        render();
+        showToast('Player removed');
+      }
+    };
+    kidList.appendChild(row);
+  });
+  document.getElementById('settingsAddKidBtn').onclick = ()=>{ closeOverlay('settingsOverlay'); openAddKid(); };
+
+  document.getElementById('exportBtn').onclick = exportBackup;
+  document.getElementById('importBtn').onclick = ()=>document.getElementById('importFile').click();
+  document.getElementById('importFile').onchange = handleImportFile;
+}
+
+function exportBackup(){
+  try{
+    const payload = { app:'chore-league', exportedAt: new Date().toISOString(), state };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = todayStr();
+    a.href = url;
+    a.download = `chore-league-backup-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    if(!state.meta) state.meta = {approvalsSinceBackup:0, lastBackupAt:null, parentPin:null};
+      if(state.meta.parentPin===undefined) state.meta.parentPin=null;
+    state.meta.approvalsSinceBackup = 0;
+    state.meta.lastBackupAt = payload.exportedAt;
+    bannerDismissed = false;
+    saveState();
+    showToast('Backup downloaded');
+  }catch(e){
+    console.error('export failed', e);
+    showToast("Couldn't export backup");
+  }
+}
+
+function handleImportFile(e){
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const parsed = JSON.parse(reader.result);
+      const incoming = parsed && parsed.state ? parsed.state : parsed;
+      if(!incoming || !Array.isArray(incoming.kids) || !Array.isArray(incoming.chores)){
+        showToast('That file doesn\'t look like a valid backup');
+        return;
+      }
+      const ok = confirm('Import this backup? It will replace all current points, kids, and history in this browser.');
+      if(!ok) return;
+      state = incoming;
+      if(!state.bank) state.bank = {};
+      if(!state.days) state.days = {};
+      if(!state.meta) state.meta = {approvalsSinceBackup:0, lastBackupAt:null, parentPin:null};
+      if(state.meta.parentPin===undefined) state.meta.parentPin=null;
+      bannerDismissed = false;
+      currentKidId = state.kids.length ? state.kids[0].id : null;
+      saveState();
+      render();
+      renderSettingsSheet();
+      showToast('Backup restored');
+    }catch(err){
+      console.error('import failed', err);
+      showToast('Could not read that file');
+    }finally{
+      e.target.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ---------------- PARENT PIN LOCK ---------------- */
+function requirePin(action){
+  if(parentUnlocked){ action(); return; }
+  if(!state.meta) state.meta = {approvalsSinceBackup:0, lastBackupAt:null, parentPin:null};
+  if(!state.meta.parentPin){
+    openPinSheet('setup', action);
+  } else {
+    openPinSheet('verify', action);
+  }
+}
+
+function openPinSheet(mode, onSuccess){
+  const overlay = document.getElementById('pinOverlay');
+  overlay.classList.add('open');
+  renderPinSheet(mode, onSuccess);
+  overlay.onclick = (e)=>{ if(e.target===overlay) closeOverlay('pinOverlay'); };
+}
+
+function renderPinSheet(mode, onSuccess){
+  const sheet = document.getElementById('pinSheet');
+  if(mode === 'setup'){
+    sheet.innerHTML = `
+      <div class="sheet-head">
+        <div>
+          <div class="sheet-title">SET PARENT PIN</div>
+          <div class="sheet-sub">Keeps stats, approvals &amp; settings parent-only</div>
+        </div>
+        <button class="close-x" onclick="closeOverlay('pinOverlay')">✕</button>
+      </div>
+      <div class="pin-hint">Choose a 4+ digit PIN. Keep it somewhere you'll remember — there's no reset built in.</div>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" class="pin-input" id="pinNew" placeholder="••••" maxlength="8">
+      <input type="password" inputmode="numeric" pattern="[0-9]*" class="pin-input" id="pinConfirm" placeholder="confirm" maxlength="8">
+      <div class="pin-error" id="pinError"></div>
+      <div class="footer-actions">
+        <button class="btn primary" id="pinSetBtn">Set PIN &amp; continue</button>
+      </div>
+    `;
+    document.getElementById('pinSetBtn').onclick = ()=>{
+      const a = document.getElementById('pinNew').value.trim();
+      const b = document.getElementById('pinConfirm').value.trim();
+      const err = document.getElementById('pinError');
+      if(a.length < 4){ err.textContent = 'PIN needs at least 4 digits'; return; }
+      if(a !== b){ err.textContent = "PINs don't match"; return; }
+      state.meta.parentPin = a;
+      saveState();
+      parentUnlocked = true;
+      updateLockIndicator();
+      closeOverlay('pinOverlay');
+      showToast('Parent PIN set');
+      onSuccess();
+    };
+  } else if(mode === 'verify'){
+    sheet.innerHTML = `
+      <div class="sheet-head">
+        <div>
+          <div class="sheet-title">PARENT PIN</div>
+          <div class="sheet-sub">Enter your PIN to continue</div>
+        </div>
+        <button class="close-x" onclick="closeOverlay('pinOverlay')">✕</button>
+      </div>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" class="pin-input" id="pinVerify" placeholder="••••" maxlength="8" autofocus>
+      <div class="pin-error" id="pinError"></div>
+      <div class="footer-actions" style="justify-content:space-between;">
+        <button class="btn small ghost" id="forgotPinBtn">Forgot PIN?</button>
+        <button class="btn primary" id="pinVerifyBtn">Unlock</button>
+      </div>
+    `;
+    const tryUnlock = ()=>{
+      const val = document.getElementById('pinVerify').value.trim();
+      const err = document.getElementById('pinError');
+      if(val === state.meta.parentPin){
+        parentUnlocked = true;
+        updateLockIndicator();
+        closeOverlay('pinOverlay');
+        onSuccess();
+      } else {
+        err.textContent = 'Wrong PIN — try again';
+        document.getElementById('pinVerify').value = '';
+        document.getElementById('pinVerify').focus();
+      }
+    };
+    document.getElementById('pinVerifyBtn').onclick = tryUnlock;
+    document.getElementById('pinVerify').onkeydown = (e)=>{ if(e.key==='Enter') tryUnlock(); };
+    document.getElementById('forgotPinBtn').onclick = ()=>renderPinRecovery(onSuccess);
+  }
+}
+
+function renderPinRecovery(onSuccess){
+  const sheet = document.getElementById('pinSheet');
+  sheet.innerHTML = `
+    <div class="sheet-head">
+      <div>
+        <div class="sheet-title">RECOVER PIN</div>
+        <div class="sheet-sub">Use a backup file to confirm it's you</div>
+      </div>
+      <button class="close-x" onclick="closeOverlay('pinOverlay')">✕</button>
+    </div>
+    <div class="pin-hint" style="text-align:left;">Upload any backup <code>.json</code> file you exported before (Playbook → Backup → Export). If it was made while this PIN was active, we'll unlock you and show the PIN so you can write it down.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 6px;">
+      <button class="btn small primary" id="recoverFileBtn">📄 Choose backup file</button>
+      <input type="file" id="recoverFileInput" accept="application/json" style="display:none;">
+    </div>
+    <div class="pin-error" id="pinError"></div>
+    <div class="footer-actions">
+      <button class="btn small ghost" id="backToPinBtn">Back to PIN entry</button>
+    </div>
+  `;
+  document.getElementById('backToPinBtn').onclick = ()=>renderPinSheet('verify', onSuccess);
+  document.getElementById('recoverFileBtn').onclick = ()=>document.getElementById('recoverFileInput').click();
+  document.getElementById('recoverFileInput').onchange = (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const err = document.getElementById('pinError');
+      try{
+        const parsed = JSON.parse(reader.result);
+        const backupState = parsed && parsed.state ? parsed.state : parsed;
+        const recoveredPin = backupState && backupState.meta ? backupState.meta.parentPin : null;
+        if(!recoveredPin){
+          err.textContent = "That backup doesn't have a PIN saved in it.";
+          return;
+        }
+        if(recoveredPin === state.meta.parentPin){
+          parentUnlocked = true;
+          updateLockIndicator();
+          closeOverlay('pinOverlay');
+          showToast(`Unlocked! Your PIN is ${recoveredPin} — worth writing down`);
+          onSuccess();
+        } else {
+          err.textContent = "That backup's PIN doesn't match the current lock — you must have changed it since then.";
+        }
+      }catch(err2){
+        console.error('recovery failed', err2);
+        document.getElementById('pinError').textContent = "Couldn't read that file.";
+      }finally{
+        e.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  };
+}
+
+function updateLockIndicator(){
+  const btn = document.getElementById('lockBtn');
+  if(!btn) return;
+  btn.textContent = parentUnlocked ? '🔓' : '🔒';
+  btn.title = parentUnlocked ? 'Unlocked — tap to re-lock' : 'Parent lock — tap for status';
+}
+
+document.getElementById('lockBtn').onclick = ()=>{
+  if(parentUnlocked){
+    parentUnlocked = false;
+    updateLockIndicator();
+    showToast('Parent lock re-enabled');
+  } else {
+    showToast(state.meta && state.meta.parentPin ? 'Locked — enter PIN from Playbook or Stats' : 'No PIN set yet — open Playbook to set one');
+  }
+};
+
+/* ---------------- helpers ---------------- */
+function closeOverlay(id){
+  document.getElementById(id).classList.remove('open');
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+loadState();
+</script>
+</body>
+</html>
