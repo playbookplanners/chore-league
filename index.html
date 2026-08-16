@@ -426,7 +426,7 @@ const DEFAULT_CHORES = [
   {name:'Sleep in own bed', points:2},
   {name:'Wake up with no fighting (school)', points:2},
   {name:'Workout', points:2},
-  {name:'No extra blanket', points:3},
+  {name:'Do not eat the blanket', points:3},
   {name:'Make bed', points:1},
   {name:'Pick up clothes', points:1},
   {name:'Clean room', points:3},
@@ -637,16 +637,22 @@ function renderCalendar(kid){
     if(dstr > today) cell.classList.add('future');
 
     const rec = kidDays[dstr];
+    const dayPts = rec ? rec.checked.reduce((sum,cid)=>{
+      const ch = state.chores.find(c=>c.id===cid);
+      return sum + (ch?ch.points:0);
+    },0) : 0;
+
     let inner = `<div class="num">${d}</div>`;
     if(rec && rec.approved){
       cell.classList.add('played');
-      const pts = rec.checked.reduce((sum,cid)=>{
-        const ch = state.chores.find(c=>c.id===cid);
-        return sum + (ch?ch.points:0);
-      },0);
-      inner += `<div class="win-ribbon">W ${fmtPts(pts)}</div>`;
+      inner += `<div class="win-ribbon">W ${fmtPts(dayPts)}</div>`;
+      inner += `<div class="day-money">${fmtMoney(dayPts)}</div>`;
+    } else if(rec && rec.submitted){
+      inner += `<div class="win-ribbon" style="background:linear-gradient(180deg,#eee,#ccc);color:var(--navy-dark);">⏳ WAIT</div>`;
+      inner += `<div class="day-money">${fmtMoney(dayPts)}</div>`;
     } else if(rec && rec.checked && rec.checked.length){
-      inner += `<div class="progress" style="color:${kid.color}">${rec.checked.length}/${state.chores.length}</div>`;
+      inner += `<div class="progress" style="color:${kid.color}">+${fmtPts(dayPts)} pts</div>`;
+      inner += `<div class="day-money">${fmtMoney(dayPts)}</div>`;
     } else {
       inner += `<div class="dot"></div>`;
     }
@@ -670,15 +676,24 @@ function renderDaySheet(){
   const kid = getKid(currentKidId);
   ensureKidData(kid.id);
   if(!state.days[kid.id][activeDayStr]){
-    state.days[kid.id][activeDayStr] = {checked:[], approved:false};
+    state.days[kid.id][activeDayStr] = {checked:[], approved:false, submitted:false};
   }
   const rec = state.days[kid.id][activeDayStr];
+  if(rec.submitted === undefined) rec.submitted = false;
   const sheet = document.getElementById('daySheet');
+  const editable = !rec.approved && !rec.submitted;
 
   const pendingPts = rec.checked.reduce((s,cid)=>{
     const ch = state.chores.find(c=>c.id===cid);
     return s + (ch?ch.points:0);
   },0);
+
+  let statusBanner = '';
+  if(rec.approved){
+    statusBanner = `<div class="approved-badge">🏆 Final score locked in &mdash; points on the board</div>`;
+  } else if(rec.submitted){
+    statusBanner = `<div class="approved-badge" style="background:#e9edf5;color:var(--navy);">⏳ Saved &mdash; waiting for a parent to approve</div>`;
+  }
 
   sheet.innerHTML = `
     <div class="sheet-head">
@@ -689,16 +704,17 @@ function renderDaySheet(){
       <button class="close-x" onclick="closeOverlay('dayOverlay')">✕</button>
     </div>
 
-    ${rec.approved ? `<div class="approved-badge">🏆 Final score locked in &mdash; points on the board</div>` : ''}
+    ${statusBanner}
 
     <div class="lineup-label">Starting Lineup</div>
     <ul class="chore-list" id="choreList"></ul>
 
+    ${editable ? `
     <div class="add-chore-form">
       <input type="text" id="newChoreName" placeholder="New play (e.g. Set the table)" maxlength="60">
       <input type="number" id="newChorePts" placeholder="pts" step="0.5" min="0">
       <button class="btn small" id="addChoreBtn">Add</button>
-    </div>
+    </div>` : ''}
 
     <div class="pending-bar">
       <span class="lbl">${rec.approved ? 'Final score' : 'Current score'}</span>
@@ -708,7 +724,10 @@ function renderDaySheet(){
     <div class="footer-actions">
       ${rec.approved
         ? `<button class="btn ghost" id="reopenBtn">Reopen game</button>`
-        : `<button class="btn primary" id="approveBtn">🏆 Lock In The Win</button>`}
+        : rec.submitted
+          ? `<button class="btn ghost" id="unlockBtn">Edit again</button><button class="btn primary" id="approveBtn">🏆 Lock In The Win</button>`
+          : `<button class="btn primary" id="submitBtn">💾 Save for approval</button>`
+      }
     </div>
   `;
 
@@ -724,7 +743,7 @@ function renderDaySheet(){
       <span class="chore-name">${escapeHtml(ch.name)}</span>
       <span class="chore-pts">+${fmtPts(ch.points)}</span>
     `;
-    if(!rec.approved){
+    if(editable){
       li.querySelector('.check-mark').onclick = ()=>toggleChore(ch.id);
       li.style.cursor = 'pointer';
       li.onclick = ()=>{ toggleChore(ch.id); };
@@ -732,18 +751,21 @@ function renderDaySheet(){
     list.appendChild(li);
   });
 
-  if(!rec.approved){
-    document.getElementById('addChoreBtn').onclick = addChoreFromDay;
-    document.getElementById('approveBtn').onclick = ()=>requirePin(approveDay);
-  } else {
+  if(rec.approved){
     document.getElementById('reopenBtn').onclick = ()=>requirePin(reopenDay);
+  } else if(rec.submitted){
+    document.getElementById('approveBtn').onclick = ()=>requirePin(approveDay);
+    document.getElementById('unlockBtn').onclick = ()=>requirePin(unlockSubmission);
+  } else {
+    document.getElementById('addChoreBtn').onclick = addChoreFromDay;
+    document.getElementById('submitBtn').onclick = submitDay;
   }
 }
 
 function toggleChore(choreId){
   const kid = getKid(currentKidId);
   const rec = state.days[kid.id][activeDayStr];
-  if(rec.approved) return;
+  if(rec.approved || rec.submitted) return;
   const idx = rec.checked.indexOf(choreId);
   if(idx>=0) rec.checked.splice(idx,1); else rec.checked.push(choreId);
   saveState();
@@ -764,9 +786,33 @@ function addChoreFromDay(){
   renderDaySheet();
 }
 
+function submitDay(){
+  const kid = getKid(currentKidId);
+  const rec = state.days[kid.id][activeDayStr];
+  if(!rec.checked.length){
+    if(!confirm("You haven't checked off anything yet — save anyway?")) return;
+  }
+  rec.submitted = true;
+  saveState();
+  showToast('Saved! Ask a parent to approve it 🙌');
+  renderDaySheet();
+  render();
+}
+
+function unlockSubmission(){
+  const kid = getKid(currentKidId);
+  const rec = state.days[kid.id][activeDayStr];
+  rec.submitted = false;
+  saveState();
+  showToast('Unlocked for editing');
+  renderDaySheet();
+  render();
+}
+
 function approveDay(){
   const kid = getKid(currentKidId);
   const rec = state.days[kid.id][activeDayStr];
+  if(!rec.submitted){ showToast('This day hasn\'t been saved by a kid yet'); return; }
   const pts = rec.checked.reduce((s,cid)=>{
     const ch = state.chores.find(c=>c.id===cid);
     return s + (ch?ch.points:0);
@@ -792,6 +838,7 @@ function reopenDay(){
     return s + (ch?ch.points:0);
   },0);
   rec.approved = false;
+  rec.submitted = false;
   state.bank[kid.id].total -= pts;
   state.bank[kid.id].history.unshift({id:uid(), date:activeDayStr, delta:-pts, note:'Game reopened', type:'approval'});
   saveState();
@@ -993,10 +1040,16 @@ function renderSettingsSheet(){
     const li = document.createElement('li');
     li.className = 'chore-row';
     li.innerHTML = `
-      <span class="chore-name">${escapeHtml(ch.name)}</span>
+      <input type="text" value="${escapeHtml(ch.name)}" class="name-edit" style="flex:1;">
       <input type="number" step="0.5" min="0" value="${ch.points}" style="width:60px;" class="pts-edit">
       <button class="chore-del" title="Delete chore">🗑</button>
     `;
+    const nameEdit = li.querySelector('.name-edit');
+    nameEdit.onchange = ()=>{
+      const v = nameEdit.value.trim();
+      if(v){ ch.name = v; saveState(); render(); showToast('Chore renamed'); }
+      else { nameEdit.value = ch.name; }
+    };
     const ptsEdit = li.querySelector('.pts-edit');
     ptsEdit.onchange = ()=>{
       const v = parseFloat(ptsEdit.value);
