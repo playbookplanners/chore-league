@@ -378,6 +378,17 @@
   .lb-rank{font-family:'Teko',sans-serif;font-weight:700;font-size:1.1rem;color:var(--ink-soft);width:24px;}
   .lb-name{flex:1;font-weight:600;font-size:0.85rem;}
   .lb-pts{font-family:'Teko',sans-serif;font-weight:700;font-size:1.05rem;color:var(--gold-dark);}
+
+  .mini-links{display:flex;flex-direction:column;gap:4px;align-items:flex-end;}
+  .mini-link{
+    background:transparent;border:none;color:var(--gold);
+    font-family:'Oswald',sans-serif;font-size:0.72rem;font-weight:600;
+    text-transform:uppercase;letter-spacing:0.03em;padding:2px 4px;
+    text-decoration:underline;text-underline-offset:2px;opacity:0.85;
+  }
+  .mini-link:hover{opacity:1;}
+  .field-label-row{display:flex;justify-content:space-between;align-items:center;}
+  .field-label-row .mini-link{color:var(--gold-dark);}
   .adjust-form input[type=number]{width:80px;}
   .adjust-form input[type=text]{flex:1;min-width:140px;}
 
@@ -603,6 +614,10 @@ function effectiveChorePoints(choreId, dstr){
 function sumCheckedPoints(checkedIds, dstr){
   return checkedIds.reduce((s,cid)=> s + effectiveChorePoints(cid, dstr), 0);
 }
+function awardedPointsForDay(rec, dstr){
+  if(rec.approved && rec.awardedPoints != null) return rec.awardedPoints;
+  return sumCheckedPoints(rec.checked, dstr);
+}
 
 /* ---------------- Streaks ---------------- */
 function isDayApproved(kidId, dstr){
@@ -640,7 +655,7 @@ function pointsInRange(kidId, start, end){
     const [y,m,d] = dstr.split('-').map(Number);
     const dt = new Date(y, m-1, d);
     if(dt >= start && dt <= end && days[dstr].approved){
-      const pts = sumCheckedPoints(days[dstr].checked, dstr);
+      const pts = awardedPointsForDay(days[dstr], dstr);
       total += pts;
       if(pts > best.pts){ best = {date:dstr, pts}; }
     }
@@ -711,9 +726,9 @@ function renderMain(){
         <div class="scoreboard"><div class="digits">${fmtPts(bank.total)}</div></div>
         <div class="sub">${fmtMoney(bank.total)} banked ${streak > 0 ? `&middot; <span class="streak-badge">🔥 ${streak} day streak</span>` : ''}</div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-        <button class="btn small ghost" id="openBankBtn">View stats</button>
-        <button class="btn small ghost" id="recapBtn">📊 Recap</button>
+      <div class="mini-links">
+        <button class="mini-link" id="openBankBtn">📊 Stats</button>
+        <button class="mini-link" id="recapBtn">🏆 Recap</button>
       </div>
     </div>
 
@@ -747,7 +762,7 @@ function renderMain(){
     document.getElementById('bannerDismissBtn').onclick = ()=>{ bannerDismissed = true; render(); };
   }
 
-  document.getElementById('openBankBtn').onclick = ()=>requirePin(()=>openBank(kid.id));
+  document.getElementById('openBankBtn').onclick = ()=>openBank(kid.id);
   document.getElementById('recapBtn').onclick = openRecap;
   document.getElementById('prevMonth').onclick = ()=>{ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderMain(); };
   document.getElementById('nextMonth').onclick = ()=>{ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderMain(); };
@@ -785,7 +800,7 @@ function renderCalendar(kid){
     if(dstr > today) cell.classList.add('future');
 
     const rec = kidDays[dstr];
-    const dayPts = rec ? sumCheckedPoints(rec.checked, dstr) : 0;
+    const dayPts = rec ? awardedPointsForDay(rec, dstr) : 0;
 
     let inner = `<div class="num">${d}</div>`;
     if(rec && rec.approved){
@@ -829,7 +844,7 @@ function renderDaySheet(){
   const editable = !rec.approved;
   const bank = state.bank[kid.id];
 
-  const pendingPts = sumCheckedPoints(rec.checked, activeDayStr);
+  const pendingPts = awardedPointsForDay(rec, activeDayStr);
 
   let statusBanner = '';
   if(rec.approved){
@@ -1000,6 +1015,7 @@ function approveDay(){
   if(!rec.submitted){ showToast('This day hasn\'t been saved by a kid yet'); return; }
   const pts = sumCheckedPoints(rec.checked, activeDayStr);
   rec.approved = true;
+  rec.awardedPoints = pts;
   ensureKidData(kid.id);
   state.bank[kid.id].total += pts;
   state.bank[kid.id].history.unshift({id:uid(), date:activeDayStr, delta:pts, note:'Game won', type:'approval'});
@@ -1015,9 +1031,10 @@ function approveDay(){
 function reopenDay(){
   const kid = getKid(currentKidId);
   const rec = state.days[kid.id][activeDayStr];
-  const pts = sumCheckedPoints(rec.checked, activeDayStr);
+  const pts = rec.awardedPoints != null ? rec.awardedPoints : sumCheckedPoints(rec.checked, activeDayStr);
   rec.approved = false;
   rec.submitted = false;
+  rec.awardedPoints = null;
   state.bank[kid.id].total -= pts;
   state.bank[kid.id].history.unshift({id:uid(), date:activeDayStr, delta:-pts, note:'Game reopened', type:'approval'});
   saveState();
@@ -1147,7 +1164,10 @@ function renderBankSheet(){
       </div>
     `}
 
-    <span class="field-label" style="margin-top:16px;display:block;">🛍️ Rewards shop</span>
+    <div class="field-label-row" style="margin-top:16px;">
+      <span class="field-label" style="margin:0;">🛍️ Rewards shop</span>
+      <button class="mini-link" id="manageRewardsBtn" style="text-align:right;">⚙ Manage</button>
+    </div>
     <div id="rewardsShopList" class="rewards-shop"></div>
 
     <span class="field-label" style="margin-top:16px;display:block;">💵 Redeem points (cash out / spend)</span>
@@ -1159,6 +1179,7 @@ function renderBankSheet(){
 
     <span class="field-label">Bonus / penalty (add or remove points)</span>
     <div class="adjust-form">
+      <input type="date" id="adjustDate" value="${todayStr()}" style="flex:0 0 140px;">
       <input type="number" id="adjustPts" placeholder="e.g. -2 or 3" step="0.5">
       <input type="text" id="adjustNote" placeholder="Reason (e.g. left towel on floor)" maxlength="60">
       <button class="btn small primary" id="adjustBtn">Apply</button>
@@ -1167,6 +1188,11 @@ function renderBankSheet(){
     <span class="field-label">Play-by-play</span>
     <ul class="history-list" id="historyList"></ul>
   `;
+
+  document.getElementById('manageRewardsBtn').onclick = ()=>requirePin(()=>{
+    closeOverlay('bankOverlay');
+    openSettings();
+  });
 
   const shopList = document.getElementById('rewardsShopList');
   if(!state.rewards.length){
@@ -1178,7 +1204,7 @@ function renderBankSheet(){
       item.className = 'reward-item';
       item.disabled = !canAfford;
       item.innerHTML = `<span>${escapeHtml(r.name)}</span><span class="reward-cost">${fmtPts(r.cost)} pts</span>`;
-      item.onclick = ()=>{
+      item.onclick = ()=>requirePin(()=>{
         if(!confirm(`Redeem "${r.name}" for ${fmtPts(r.cost)} pts?`)) return;
         bank.total -= r.cost;
         bank.history.unshift({id:uid(), date: todayStr(), delta: -r.cost, note: r.name, type:'manual', kind:'redeem'});
@@ -1186,7 +1212,7 @@ function renderBankSheet(){
         renderBankSheet();
         render();
         showToast(`Redeemed: ${r.name}`);
-      };
+      });
       shopList.appendChild(item);
     });
   }
@@ -1232,21 +1258,22 @@ function renderBankSheet(){
       list.appendChild(row);
     });
     list.querySelectorAll('.undo-entry-btn').forEach(btn=>{
-      btn.onclick = ()=>undoHistoryEntry(btn.dataset.id);
+      btn.onclick = ()=>requirePin(()=>undoHistoryEntry(btn.dataset.id));
     });
   }
-  document.getElementById('adjustBtn').onclick = ()=>{
+  document.getElementById('adjustBtn').onclick = ()=>requirePin(()=>{
     const val = parseFloat(document.getElementById('adjustPts').value);
     const note = document.getElementById('adjustNote').value.trim() || (val>=0?'Bonus points':'Penalty');
+    const dateVal = document.getElementById('adjustDate').value || todayStr();
     if(isNaN(val) || val===0){ showToast('Enter a point amount'); return; }
     bank.total += val;
-    bank.history.unshift({id:uid(), date: todayStr(), delta: val, note, type:'manual'});
+    bank.history.unshift({id:uid(), date: dateVal, delta: val, note, type:'manual'});
     saveState();
     renderBankSheet();
     render();
     showToast(val>0?'Points added':'Points removed');
-  };
-  document.getElementById('redeemBtn').onclick = ()=>{
+  });
+  document.getElementById('redeemBtn').onclick = ()=>requirePin(()=>{
     const val = parseFloat(document.getElementById('redeemPts').value);
     const note = document.getElementById('redeemNote').value.trim() || 'Redeemed';
     if(isNaN(val) || val<=0){ showToast('Enter how many points to redeem'); return; }
@@ -1259,7 +1286,7 @@ function renderBankSheet(){
     renderBankSheet();
     render();
     showToast('Points redeemed');
-  };
+  });
 }
 
 function undoHistoryEntry(entryId){
@@ -1570,6 +1597,8 @@ function handleImportFile(e){
       const ok = confirm('Import this backup? It will replace all current points, kids, and history in this browser.');
       if(!ok) return;
       state = incoming;
+      if(!state.chores || !state.chores.length){ state.chores = DEFAULT_CHORES.map(c=>({id:uid(),name:c.name,points:c.points})); }
+      if(!state.rewards) state.rewards = DEFAULT_REWARDS.map(r=>({id:uid(), name:r.name, cost:r.cost}));
       if(!state.bank) state.bank = {};
       if(!state.days) state.days = {};
       if(!state.meta) state.meta = {approvalsSinceBackup:0, lastBackupAt:null, parentPin:null};
