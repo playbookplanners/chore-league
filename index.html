@@ -269,6 +269,7 @@
     background:#fff;
   }
   .chore-row.checked{background:#fff6de;border-color:var(--gold);}
+  .chore-row.bonus-row{box-shadow:0 0 0 1.5px var(--gold) inset;}
   .check-mark{
     width:28px;height:28px;flex:0 0 28px;border-radius:6px;
     border:2.5px solid var(--chalk-dim);
@@ -324,6 +325,59 @@
   .delta.neg{color:var(--red);}
 
   .adjust-form{display:flex;gap:8px;margin:12px 0;align-items:center;flex-wrap:wrap;}
+
+  /* ---------- Ledger ---------- */
+  .ledger-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px;}
+  .ledger-tile{background:#fff;border:1.5px solid var(--chalk-dim);border-radius:10px;padding:10px 8px;text-align:center;}
+  .ledger-tile.balance{background:var(--navy);border-color:var(--navy-dark);}
+  .ledger-label{font-family:'Oswald',sans-serif;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-soft);margin-bottom:4px;}
+  .ledger-tile.balance .ledger-label{color:var(--chalk-dim);}
+  .ledger-val{font-family:'Teko',sans-serif;font-weight:700;font-size:1.5rem;line-height:1;}
+  .ledger-val.earn{color:var(--gold-dark);}
+  .ledger-val.redeem{color:var(--red);}
+  .ledger-val.bal{color:var(--gold);}
+  .ledger-sub{font-size:0.65rem;color:var(--ink-soft);margin-top:2px;}
+  .ledger-tile.balance .ledger-sub{color:var(--chalk-dim);}
+  .hist-tag{
+    display:inline-block;font-family:'Oswald',sans-serif;font-size:0.6rem;font-weight:700;
+    letter-spacing:0.03em;padding:1px 6px;border-radius:4px;margin-right:6px;vertical-align:middle;
+  }
+  .hist-tag.earn{background:#eefaf0;color:var(--green,#0b7a4b);}
+  .hist-tag.penalty{background:#fdecec;color:var(--red);}
+  .hist-tag.redeem{background:#eef1fb;color:var(--blue,#2c6fe0);}
+
+  .streak-badge{color:#ff8a00;font-weight:700;}
+
+  .goal-card{
+    background:var(--paper,#fff);border:2px solid var(--navy);border-radius:14px;
+    padding:12px 16px;margin-bottom:20px;box-shadow:var(--shadow);
+  }
+  .goal-head{display:flex;justify-content:space-between;align-items:center;font-family:'Oswald',sans-serif;font-size:0.82rem;color:var(--navy);margin-bottom:8px;flex-wrap:wrap;gap:6px;}
+  .goal-bar-track{width:100%;height:14px;background:var(--chalk-dim);border-radius:999px;overflow:hidden;}
+  .goal-bar-fill{height:100%;background:linear-gradient(90deg, var(--gold), var(--gold-dark));border-radius:999px;transition:width .3s ease;}
+  .goal-reached{margin-top:8px;font-family:'Oswald',sans-serif;font-weight:700;font-size:0.8rem;color:var(--gold-dark);}
+  .goal-inline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:0.85rem;margin-bottom:12px;}
+
+  .rewards-shop{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .reward-item{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 14px;border-radius:10px;border:1.5px solid var(--chalk-dim);
+    background:#fff;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:600;color:var(--ink);
+    cursor:pointer;text-align:left;
+  }
+  .reward-item:hover:not(:disabled){border-color:var(--gold-dark);background:#fffaf0;}
+  .reward-item:disabled{opacity:0.45;cursor:not-allowed;}
+  .reward-item .reward-cost{font-family:'Teko',sans-serif;font-weight:700;font-size:1.05rem;color:var(--gold-dark);}
+
+  .recap-stat-row{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:9px;background:#fafaf5;border:1.5px solid var(--chalk-dim);font-size:0.85rem;margin-bottom:6px;}
+  .recap-stat-row strong{font-family:'Teko',sans-serif;font-size:1.1rem;color:var(--navy);}
+
+  .leaderboard-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+  .leaderboard-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;background:#fff;border:1.5px solid var(--chalk-dim);}
+  .leaderboard-row.me{border-color:var(--gold);background:#fffaf0;}
+  .lb-rank{font-family:'Teko',sans-serif;font-weight:700;font-size:1.1rem;color:var(--ink-soft);width:24px;}
+  .lb-name{flex:1;font-weight:600;font-size:0.85rem;}
+  .lb-pts{font-family:'Teko',sans-serif;font-weight:700;font-size:1.05rem;color:var(--gold-dark);}
   .adjust-form input[type=number]{width:80px;}
   .adjust-form input[type=text]{flex:1;min-width:140px;}
 
@@ -418,6 +472,11 @@
   <div class="sheet" id="pinSheet"></div>
 </div>
 
+<!-- Weekly Recap / Leaderboard sheet -->
+<div class="overlay" id="recapOverlay">
+  <div class="sheet" id="recapSheet"></div>
+</div>
+
 <script>
 const KID_COLORS = ['#1a2947','#e8433a','#f7b500','#1f7a4d','#6b3fa0','#0e7c86','#e2711d'];
 const POINT_VALUE = 0.5; // dollars per point
@@ -437,6 +496,13 @@ const DEFAULT_CHORES = [
   {name:'Wash dishes', points:0.5},
   {name:'Take out garbage', points:0.5},
   {name:'Read', points:0.5},
+];
+
+const DEFAULT_REWARDS = [
+  {name:'30 min extra screen time', cost:5},
+  {name:'Pick what\'s for dinner', cost:10},
+  {name:'Stay up 30 min late', cost:8},
+  {name:'Skip one chore tomorrow', cost:12},
 ];
 
 let state = null;
@@ -475,12 +541,13 @@ function showToast(msg){
 }
 
 function defaultState(){
-  return { kids: [], chores: DEFAULT_CHORES.map(c=>({id:uid(), name:c.name, points:c.points})), bank:{}, days:{}, meta:{approvalsSinceBackup:0, lastBackupAt:null, parentPin:null} };
+  return { kids: [], chores: DEFAULT_CHORES.map(c=>({id:uid(), name:c.name, points:c.points})), rewards: DEFAULT_REWARDS.map(r=>({id:uid(), name:r.name, cost:r.cost})), bank:{}, days:{}, meta:{approvalsSinceBackup:0, lastBackupAt:null, parentPin:null} };
 }
 
 const BACKUP_REMINDER_THRESHOLD = 5;
 let bannerDismissed = false;
 let parentUnlocked = false;
+let goalEditMode = false;
 
 async function loadState(){
   try{
@@ -488,6 +555,7 @@ async function loadState(){
     if(raw){
       state = JSON.parse(raw);
       if(!state.chores || !state.chores.length){ state.chores = DEFAULT_CHORES.map(c=>({id:uid(),name:c.name,points:c.points})); }
+      if(!state.rewards) state.rewards = DEFAULT_REWARDS.map(r=>({id:uid(), name:r.name, cost:r.cost}));
       if(!state.kids) state.kids = [];
       if(!state.bank) state.bank = {};
       if(!state.days) state.days = {};
@@ -515,8 +583,69 @@ async function saveState(){
 }
 
 function ensureKidData(kidId){
-  if(!state.bank[kidId]) state.bank[kidId] = {total:0, history:[]};
+  if(!state.bank[kidId]) state.bank[kidId] = {total:0, history:[], goal:null};
+  if(state.bank[kidId].goal === undefined) state.bank[kidId].goal = null;
   if(!state.days[kidId]) state.days[kidId] = {};
+}
+
+/* ---------------- Daily bonus challenge (rotates automatically) ---------------- */
+function bonusChoreIdForDay(dstr){
+  if(!state.chores.length) return null;
+  let hash = 0;
+  for(let i=0;i<dstr.length;i++){ hash = (hash*31 + dstr.charCodeAt(i)) >>> 0; }
+  return state.chores[hash % state.chores.length].id;
+}
+function effectiveChorePoints(choreId, dstr){
+  const ch = state.chores.find(c=>c.id===choreId);
+  if(!ch) return 0;
+  return choreId === bonusChoreIdForDay(dstr) ? ch.points * 2 : ch.points;
+}
+function sumCheckedPoints(checkedIds, dstr){
+  return checkedIds.reduce((s,cid)=> s + effectiveChorePoints(cid, dstr), 0);
+}
+
+/* ---------------- Streaks ---------------- */
+function isDayApproved(kidId, dstr){
+  const days = state.days[kidId];
+  return !!(days && days[dstr] && days[dstr].approved);
+}
+function computeStreak(kidId){
+  let streak = 0;
+  const cursor = new Date();
+  if(!isDayApproved(kidId, fmtDate(cursor))){
+    cursor.setDate(cursor.getDate()-1);
+  }
+  while(isDayApproved(kidId, fmtDate(cursor))){
+    streak++;
+    cursor.setDate(cursor.getDate()-1);
+  }
+  return streak;
+}
+
+/* ---------------- Weekly stats ---------------- */
+function weekRange(offsetWeeks){
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  const start = new Date(now);
+  start.setDate(now.getDate() - day - (offsetWeeks*7));
+  start.setHours(0,0,0,0);
+  const end = new Date(start);
+  end.setDate(start.getDate()+6);
+  return {start, end};
+}
+function pointsInRange(kidId, start, end){
+  const days = state.days[kidId] || {};
+  let total = 0, best = {date:null, pts:0};
+  Object.keys(days).forEach(dstr=>{
+    const [y,m,d] = dstr.split('-').map(Number);
+    const dt = new Date(y, m-1, d);
+    if(dt >= start && dt <= end && days[dstr].approved){
+      const pts = sumCheckedPoints(days[dstr].checked, dstr);
+      total += pts;
+      if(pts > best.pts){ best = {date:dstr, pts}; }
+    }
+  });
+  return {total, best};
 }
 
 function getKid(id){ return state.kids.find(k=>k.id===id); }
@@ -563,6 +692,10 @@ function renderMain(){
 
   const overdue = !bannerDismissed && state.meta && (state.meta.approvalsSinceBackup||0) >= BACKUP_REMINDER_THRESHOLD;
 
+  const streak = computeStreak(kid.id);
+  const goal = bank.goal;
+  const goalPct = goal && goal.target > 0 ? Math.min(100, Math.round((bank.total/goal.target)*100)) : 0;
+
   main.innerHTML = `
     ${overdue ? `
     <div class="backup-banner">
@@ -576,12 +709,23 @@ function renderMain(){
       <div>
         <div class="who">${escapeHtml(kid.name)} — Season Stats</div>
         <div class="scoreboard"><div class="digits">${fmtPts(bank.total)}</div></div>
-        <div class="sub">${fmtMoney(bank.total)} banked</div>
+        <div class="sub">${fmtMoney(bank.total)} banked ${streak > 0 ? `&middot; <span class="streak-badge">🔥 ${streak} day streak</span>` : ''}</div>
       </div>
-      <div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
         <button class="btn small ghost" id="openBankBtn">View stats</button>
+        <button class="btn small ghost" id="recapBtn">📊 Recap</button>
       </div>
     </div>
+
+    ${goal ? `
+    <div class="goal-card">
+      <div class="goal-head">
+        <span>🎯 Saving for: <strong>${escapeHtml(goal.name)}</strong></span>
+        <span>${fmtPts(Math.min(bank.total,goal.target))}/${fmtPts(goal.target)} pts</span>
+      </div>
+      <div class="goal-bar-track"><div class="goal-bar-fill" style="width:${goalPct}%;"></div></div>
+      ${goalPct>=100 ? `<div class="goal-reached">🎉 Goal reached! Time to redeem it.</div>` : ''}
+    </div>` : ''}
 
     <div class="toolbar">
       <div class="month-nav">
@@ -604,9 +748,11 @@ function renderMain(){
   }
 
   document.getElementById('openBankBtn').onclick = ()=>requirePin(()=>openBank(kid.id));
+  document.getElementById('recapBtn').onclick = openRecap;
   document.getElementById('prevMonth').onclick = ()=>{ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderMain(); };
   document.getElementById('nextMonth').onclick = ()=>{ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderMain(); };
   document.getElementById('todayBtn').onclick = ()=>{ const n=new Date(); calMonth=n.getMonth(); calYear=n.getFullYear(); renderMain(); };
+
 
   renderCalendar(kid);
 }
@@ -639,10 +785,7 @@ function renderCalendar(kid){
     if(dstr > today) cell.classList.add('future');
 
     const rec = kidDays[dstr];
-    const dayPts = rec ? rec.checked.reduce((sum,cid)=>{
-      const ch = state.chores.find(c=>c.id===cid);
-      return sum + (ch?ch.points:0);
-    },0) : 0;
+    const dayPts = rec ? sumCheckedPoints(rec.checked, dstr) : 0;
 
     let inner = `<div class="num">${d}</div>`;
     if(rec && rec.approved){
@@ -683,19 +826,19 @@ function renderDaySheet(){
   const rec = state.days[kid.id][activeDayStr];
   if(rec.submitted === undefined) rec.submitted = false;
   const sheet = document.getElementById('daySheet');
-  const editable = !rec.approved && !rec.submitted;
+  const editable = !rec.approved;
+  const bank = state.bank[kid.id];
 
-  const pendingPts = rec.checked.reduce((s,cid)=>{
-    const ch = state.chores.find(c=>c.id===cid);
-    return s + (ch?ch.points:0);
-  },0);
+  const pendingPts = sumCheckedPoints(rec.checked, activeDayStr);
 
   let statusBanner = '';
   if(rec.approved){
     statusBanner = `<div class="approved-badge">🏆 Final score locked in &mdash; points on the board</div>`;
   } else if(rec.submitted){
-    statusBanner = `<div class="approved-badge" style="background:#e9edf5;color:var(--navy);">⏳ Saved &mdash; waiting for a parent to approve</div>`;
+    statusBanner = `<div class="approved-badge" style="background:#e9edf5;color:var(--navy);">⏳ Saved &mdash; waiting for a parent to approve. Still need to fix something? Just check or uncheck a chore below.</div>`;
   }
+
+  const dayDeductions = bank.history.filter(h=>h.date===activeDayStr && h.delta<0 && h.kind!=='redeem' && h.type!=='approval');
 
   sheet.innerHTML = `
     <div class="sheet-head">
@@ -723,27 +866,47 @@ function renderDaySheet(){
       <span class="val">+${fmtPts(pendingPts)}</span>
     </div>
 
+    <div class="lineup-label" style="margin-top:8px;">⚠️ Points off for behavior (optional)</div>
+    ${dayDeductions.length ? `
+      <ul class="history-list" style="margin-bottom:10px;">
+        ${dayDeductions.map(h=>`
+          <li class="history-row">
+            <span class="note"><span class="hist-tag penalty">PENALTY</span> ${escapeHtml(h.note)}</span>
+            <span style="display:flex;align-items:center;gap:8px;">
+              <span class="delta neg">${fmtPts(h.delta)}</span>
+              <button class="chore-del undo-entry-btn" data-id="${h.id}" title="Undo this">🗑</button>
+            </span>
+          </li>`).join('')}
+      </ul>` : ''}
+    <div class="add-chore-form" style="margin-bottom:16px;">
+      <input type="text" id="dayPenaltyNote" placeholder="What happened? (e.g. didn't listen, back talk)" maxlength="60">
+      <input type="number" id="dayPenaltyPts" placeholder="pts" step="0.5" min="0">
+      <button class="btn small danger" id="dayPenaltyBtn">Deduct</button>
+    </div>
+
     <div class="footer-actions">
       ${rec.approved
         ? `<button class="btn ghost" id="reopenBtn">Reopen game</button>`
         : rec.submitted
-          ? `<button class="btn ghost" id="unlockBtn">Edit again</button><button class="btn primary" id="approveBtn">🏆 Lock In The Win</button>`
+          ? `<button class="btn primary" id="approveBtn">🏆 Lock In The Win</button>`
           : `<button class="btn primary" id="submitBtn">💾 Save for approval</button>`
       }
     </div>
   `;
 
   const list = document.getElementById('choreList');
+  const bonusId = bonusChoreIdForDay(activeDayStr);
   state.chores.forEach(ch=>{
     const checked = rec.checked.includes(ch.id);
+    const isBonus = ch.id === bonusId;
     const li = document.createElement('li');
-    li.className = 'chore-row' + (checked?' checked':'');
+    li.className = 'chore-row' + (checked?' checked':'') + (isBonus?' bonus-row':'');
     li.innerHTML = `
       <span class="check-mark">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 10 18 20 6"></polyline></svg>
       </span>
-      <span class="chore-name">${escapeHtml(ch.name)}</span>
-      <span class="chore-pts">+${fmtPts(ch.points)}</span>
+      <span class="chore-name">${isBonus ? '<span class="hist-tag redeem" style="background:#fff3cf;color:var(--gold-dark);">🌟 2x</span> ' : ''}${escapeHtml(ch.name)}</span>
+      <span class="chore-pts">+${fmtPts(isBonus ? ch.points*2 : ch.points)}</span>
     `;
     if(editable){
       li.style.cursor = 'pointer';
@@ -752,23 +915,54 @@ function renderDaySheet(){
     list.appendChild(li);
   });
 
+  sheet.querySelectorAll('.undo-entry-btn').forEach(btn=>{
+    btn.onclick = ()=>requirePin(()=>{ undoHistoryEntry(btn.dataset.id); renderDaySheet(); });
+  });
+
+  document.getElementById('dayPenaltyBtn').onclick = ()=>{
+    const note = document.getElementById('dayPenaltyNote').value.trim();
+    const pts = parseFloat(document.getElementById('dayPenaltyPts').value);
+    if(!note){ showToast('Add a quick reason'); return; }
+    if(isNaN(pts) || pts<=0){ showToast('Enter how many points'); return; }
+    requirePin(()=>applyDayPenalty(pts, note));
+  };
+
   if(rec.approved){
     document.getElementById('reopenBtn').onclick = ()=>requirePin(reopenDay);
   } else if(rec.submitted){
     document.getElementById('approveBtn').onclick = ()=>requirePin(approveDay);
-    document.getElementById('unlockBtn').onclick = ()=>requirePin(unlockSubmission);
   } else {
     document.getElementById('addChoreBtn').onclick = addChoreFromDay;
     document.getElementById('submitBtn').onclick = submitDay;
   }
 }
 
+function applyDayPenalty(pts, note){
+  const kid = getKid(currentKidId);
+  ensureKidData(kid.id);
+  const bank = state.bank[kid.id];
+  bank.total -= pts;
+  bank.history.unshift({id:uid(), date:activeDayStr, delta:-pts, note, type:'manual'});
+  saveState();
+  showToast('Points deducted');
+  renderDaySheet();
+  render();
+}
+
 function toggleChore(choreId){
   const kid = getKid(currentKidId);
   const rec = state.days[kid.id][activeDayStr];
-  if(rec.approved || rec.submitted) return;
+  if(rec.approved) return;
   const idx = rec.checked.indexOf(choreId);
   if(idx>=0) rec.checked.splice(idx,1); else rec.checked.push(choreId);
+  if(rec.submitted){
+    if(parentUnlocked){
+      showToast('Adjusted — ready to approve');
+    } else {
+      rec.submitted = false;
+      showToast('Updated — save again for approval');
+    }
+  }
   saveState();
   renderDaySheet();
   renderMain();
@@ -800,24 +994,11 @@ function submitDay(){
   render();
 }
 
-function unlockSubmission(){
-  const kid = getKid(currentKidId);
-  const rec = state.days[kid.id][activeDayStr];
-  rec.submitted = false;
-  saveState();
-  showToast('Unlocked for editing');
-  renderDaySheet();
-  render();
-}
-
 function approveDay(){
   const kid = getKid(currentKidId);
   const rec = state.days[kid.id][activeDayStr];
   if(!rec.submitted){ showToast('This day hasn\'t been saved by a kid yet'); return; }
-  const pts = rec.checked.reduce((s,cid)=>{
-    const ch = state.chores.find(c=>c.id===cid);
-    return s + (ch?ch.points:0);
-  },0);
+  const pts = sumCheckedPoints(rec.checked, activeDayStr);
   rec.approved = true;
   ensureKidData(kid.id);
   state.bank[kid.id].total += pts;
@@ -834,10 +1015,7 @@ function approveDay(){
 function reopenDay(){
   const kid = getKid(currentKidId);
   const rec = state.days[kid.id][activeDayStr];
-  const pts = rec.checked.reduce((s,cid)=>{
-    const ch = state.chores.find(c=>c.id===cid);
-    return s + (ch?ch.points:0);
-  },0);
+  const pts = sumCheckedPoints(rec.checked, activeDayStr);
   rec.approved = false;
   rec.submitted = false;
   state.bank[kid.id].total -= pts;
@@ -902,27 +1080,84 @@ function openAddKid(){
 /* ---------------- BANK SHEET ---------------- */
 function openBank(kidId){
   currentKidId = kidId;
+  goalEditMode = false;
   const overlay = document.getElementById('bankOverlay');
   overlay.classList.add('open');
   renderBankSheet();
   overlay.onclick = (e)=>{ if(e.target===overlay) closeOverlay('bankOverlay'); };
 }
 
+function computeLedger(bank){
+  let earned = 0, redeemed = 0, penalties = 0;
+  bank.history.forEach(h=>{
+    if(h.kind === 'redeem'){ redeemed += Math.abs(h.delta); }
+    else if(h.type === 'approval'){ earned += h.delta; }
+    else if(h.delta >= 0){ earned += h.delta; }
+    else { penalties += Math.abs(h.delta); }
+  });
+  return {earned, redeemed, penalties, balance: bank.total};
+}
+
 function renderBankSheet(){
   const kid = getKid(currentKidId);
   ensureKidData(kid.id);
   const bank = state.bank[kid.id];
+  const ledger = computeLedger(bank);
   const sheet = document.getElementById('bankSheet');
   sheet.innerHTML = `
     <div class="sheet-head">
       <div>
         <div class="sheet-title">SEASON STATS</div>
-        <div class="sheet-sub">${escapeHtml(kid.name)} &middot; ${fmtPts(bank.total)} pts &middot; ${fmtMoney(bank.total)}</div>
+        <div class="sheet-sub">${escapeHtml(kid.name)}'s point bank</div>
       </div>
       <button class="close-x" onclick="closeOverlay('bankOverlay')">✕</button>
     </div>
 
-    <span class="field-label">Bonus play (add or remove points)</span>
+    <div class="ledger-grid">
+      <div class="ledger-tile">
+        <div class="ledger-label">Earned</div>
+        <div class="ledger-val earn">${fmtPts(ledger.earned)}</div>
+        <div class="ledger-sub">${fmtMoney(ledger.earned)}</div>
+      </div>
+      <div class="ledger-tile">
+        <div class="ledger-label">Redeemed</div>
+        <div class="ledger-val redeem">${fmtPts(ledger.redeemed)}</div>
+        <div class="ledger-sub">${fmtMoney(ledger.redeemed)}</div>
+      </div>
+      <div class="ledger-tile balance">
+        <div class="ledger-label">Balance now</div>
+        <div class="ledger-val bal">${fmtPts(ledger.balance)}</div>
+        <div class="ledger-sub">${fmtMoney(ledger.balance)}</div>
+      </div>
+    </div>
+    ${ledger.penalties > 0 ? `<div class="lock-status-note">Includes ${fmtPts(ledger.penalties)} pts (${fmtMoney(ledger.penalties)}) lost to penalties.</div>` : ''}
+
+    <span class="field-label" style="margin-top:16px;display:block;">🎯 Savings goal</span>
+    ${(bank.goal && !goalEditMode) ? `
+      <div class="goal-inline">
+        <span>Saving for <strong>${escapeHtml(bank.goal.name)}</strong> (${fmtPts(bank.goal.target)} pts)</span>
+        <button class="btn small ghost" id="editGoalBtn">Edit</button>
+        <button class="btn small ghost" id="clearGoalBtn">Clear</button>
+      </div>
+    ` : `
+      <div class="adjust-form">
+        <input type="text" id="goalName" placeholder="What are they saving for?" maxlength="40" value="${bank.goal ? escapeHtml(bank.goal.name) : ''}">
+        <input type="number" id="goalTarget" placeholder="pts needed" step="1" min="1" value="${bank.goal ? bank.goal.target : ''}">
+        <button class="btn small primary" id="setGoalBtn">${bank.goal ? 'Save' : 'Set goal'}</button>
+      </div>
+    `}
+
+    <span class="field-label" style="margin-top:16px;display:block;">🛍️ Rewards shop</span>
+    <div id="rewardsShopList" class="rewards-shop"></div>
+
+    <span class="field-label" style="margin-top:16px;display:block;">💵 Redeem points (cash out / spend)</span>
+    <div class="adjust-form">
+      <input type="number" id="redeemPts" placeholder="e.g. 10" step="0.5" min="0">
+      <input type="text" id="redeemNote" placeholder="What for? (e.g. cashed out for $5)" maxlength="60">
+      <button class="btn small primary" id="redeemBtn">Redeem</button>
+    </div>
+
+    <span class="field-label">Bonus / penalty (add or remove points)</span>
     <div class="adjust-form">
       <input type="number" id="adjustPts" placeholder="e.g. -2 or 3" step="0.5">
       <input type="text" id="adjustNote" placeholder="Reason (e.g. left towel on floor)" maxlength="60">
@@ -932,6 +1167,50 @@ function renderBankSheet(){
     <span class="field-label">Play-by-play</span>
     <ul class="history-list" id="historyList"></ul>
   `;
+
+  const shopList = document.getElementById('rewardsShopList');
+  if(!state.rewards.length){
+    shopList.innerHTML = `<div style="color:var(--ink-soft);font-size:0.82rem;padding:4px 2px 10px;">No rewards set up yet — add some in ⚙ Playbook.</div>`;
+  } else {
+    state.rewards.forEach(r=>{
+      const canAfford = bank.total >= r.cost;
+      const item = document.createElement('button');
+      item.className = 'reward-item';
+      item.disabled = !canAfford;
+      item.innerHTML = `<span>${escapeHtml(r.name)}</span><span class="reward-cost">${fmtPts(r.cost)} pts</span>`;
+      item.onclick = ()=>{
+        if(!confirm(`Redeem "${r.name}" for ${fmtPts(r.cost)} pts?`)) return;
+        bank.total -= r.cost;
+        bank.history.unshift({id:uid(), date: todayStr(), delta: -r.cost, note: r.name, type:'manual', kind:'redeem'});
+        saveState();
+        renderBankSheet();
+        render();
+        showToast(`Redeemed: ${r.name}`);
+      };
+      shopList.appendChild(item);
+    });
+  }
+
+  if(bank.goal && !goalEditMode){
+    document.getElementById('editGoalBtn').onclick = ()=>{ goalEditMode = true; renderBankSheet(); };
+    document.getElementById('clearGoalBtn').onclick = ()=>{
+      if(confirm('Clear this savings goal?')){ bank.goal = null; goalEditMode = false; saveState(); renderBankSheet(); render(); showToast('Goal cleared'); }
+    };
+  } else {
+    document.getElementById('setGoalBtn').onclick = ()=>{
+      const name = document.getElementById('goalName').value.trim();
+      const target = parseFloat(document.getElementById('goalTarget').value);
+      if(!name){ showToast('Give the goal a name'); return; }
+      if(isNaN(target) || target<=0){ showToast('Enter a target point amount'); return; }
+      bank.goal = {name, target};
+      goalEditMode = false;
+      saveState();
+      renderBankSheet();
+      render();
+      showToast('Goal set!');
+    };
+  }
+
   const list = document.getElementById('historyList');
   if(!bank.history.length){
     list.innerHTML = `<div style="color:var(--ink-soft);font-size:0.85rem;padding:8px 2px;">No plays yet — get on the board!</div>`;
@@ -940,8 +1219,11 @@ function renderBankSheet(){
       const row = document.createElement('li');
       row.className = 'history-row';
       const isManual = h.type === 'manual' || (h.type===undefined && h.note!=='Game won' && h.note!=='Game reopened');
+      const tag = h.kind === 'redeem' ? '<span class="hist-tag redeem">REDEEMED</span>'
+        : (h.type==='approval' ? '<span class="hist-tag earn">GAME</span>'
+        : (h.delta>=0 ? '<span class="hist-tag earn">BONUS</span>' : '<span class="hist-tag penalty">PENALTY</span>'));
       row.innerHTML = `
-        <span class="note">${escapeHtml(h.note)}<span class="date">${shortDate(h.date)}</span></span>
+        <span class="note">${tag} ${escapeHtml(h.note)}<span class="date">${shortDate(h.date)}</span></span>
         <span style="display:flex;align-items:center;gap:8px;">
           <span class="delta ${h.delta>=0?'pos':'neg'}">${h.delta>=0?'+':''}${fmtPts(h.delta)}</span>
           ${isManual ? `<button class="chore-del undo-entry-btn" data-id="${h.id}" title="Undo this entry">🗑</button>` : ''}
@@ -964,6 +1246,20 @@ function renderBankSheet(){
     render();
     showToast(val>0?'Points added':'Points removed');
   };
+  document.getElementById('redeemBtn').onclick = ()=>{
+    const val = parseFloat(document.getElementById('redeemPts').value);
+    const note = document.getElementById('redeemNote').value.trim() || 'Redeemed';
+    if(isNaN(val) || val<=0){ showToast('Enter how many points to redeem'); return; }
+    if(val > bank.total){
+      if(!confirm(`This is more than the current balance (${fmtPts(bank.total)} pts). Redeem anyway?`)) return;
+    }
+    bank.total -= val;
+    bank.history.unshift({id:uid(), date: todayStr(), delta: -val, note, type:'manual', kind:'redeem'});
+    saveState();
+    renderBankSheet();
+    render();
+    showToast('Points redeemed');
+  };
 }
 
 function undoHistoryEntry(entryId){
@@ -979,6 +1275,78 @@ function undoHistoryEntry(entryId){
   renderBankSheet();
   render();
   showToast('Entry undone');
+}
+
+/* ---------------- WEEKLY RECAP + LEADERBOARD ---------------- */
+function openRecap(){
+  const overlay = document.getElementById('recapOverlay');
+  overlay.classList.add('open');
+  renderRecapSheet();
+  overlay.onclick = (e)=>{ if(e.target===overlay) closeOverlay('recapOverlay'); };
+}
+
+function renderRecapSheet(){
+  const kid = getKid(currentKidId);
+  if(!kid) return;
+  const sheet = document.getElementById('recapSheet');
+  const thisWeek = weekRange(0);
+  const lastWeek = weekRange(1);
+  const thisStats = pointsInRange(kid.id, thisWeek.start, thisWeek.end);
+  const lastStats = pointsInRange(kid.id, lastWeek.start, lastWeek.end);
+  const diff = thisStats.total - lastStats.total;
+  const streak = computeStreak(kid.id);
+
+  const leaderboard = state.kids.map(k=>{
+    ensureKidData(k.id);
+    const wk = pointsInRange(k.id, thisWeek.start, thisWeek.end);
+    return {kid:k, pts: wk.total};
+  }).sort((a,b)=>b.pts - a.pts);
+
+  sheet.innerHTML = `
+    <div class="sheet-head">
+      <div>
+        <div class="sheet-title">WEEKLY RECAP</div>
+        <div class="sheet-sub">${escapeHtml(kid.name)} &middot; this week vs last week</div>
+      </div>
+      <button class="close-x" onclick="closeOverlay('recapOverlay')">✕</button>
+    </div>
+
+    <div class="ledger-grid">
+      <div class="ledger-tile">
+        <div class="ledger-label">This week</div>
+        <div class="ledger-val earn">${fmtPts(thisStats.total)}</div>
+        <div class="ledger-sub">${fmtMoney(thisStats.total)}</div>
+      </div>
+      <div class="ledger-tile">
+        <div class="ledger-label">Last week</div>
+        <div class="ledger-val" style="color:var(--ink-soft);">${fmtPts(lastStats.total)}</div>
+        <div class="ledger-sub">${fmtMoney(lastStats.total)}</div>
+      </div>
+      <div class="ledger-tile balance">
+        <div class="ledger-label">Change</div>
+        <div class="ledger-val" style="color:${diff>=0?'var(--gold)':'#ff8080'};">${diff>=0?'+':''}${fmtPts(diff)}</div>
+        <div class="ledger-sub">vs last week</div>
+      </div>
+    </div>
+
+    <div class="recap-stat-row">
+      <span>🔥 Current streak</span><strong>${streak} day${streak===1?'':'s'}</strong>
+    </div>
+    <div class="recap-stat-row">
+      <span>⭐ Best day this week</span><strong>${thisStats.best.date ? `${shortDate(thisStats.best.date)} (+${fmtPts(thisStats.best.pts)})` : '—'}</strong>
+    </div>
+
+    <span class="field-label" style="margin-top:18px;display:block;">🏆 Family leaderboard (this week)</span>
+    <ul class="leaderboard-list">
+      ${leaderboard.map((entry,i)=>`
+        <li class="leaderboard-row ${entry.kid.id===kid.id?'me':''}">
+          <span class="lb-rank">#${i+1}</span>
+          <span class="jersey" style="background:${entry.kid.color};width:26px;height:26px;font-size:0.85rem;">${jerseyNum(entry.kid.id)}</span>
+          <span class="lb-name">${escapeHtml(entry.kid.name)}</span>
+          <span class="lb-pts">${fmtPts(entry.pts)} pts</span>
+        </li>`).join('')}
+    </ul>
+  `;
 }
 
 /* ---------------- SETTINGS SHEET (playbook + roster) ---------------- */
@@ -1005,6 +1373,17 @@ function renderSettingsSheet(){
         <input type="text" id="settingsNewName" placeholder="New chore name" maxlength="60">
         <input type="number" id="settingsNewPts" placeholder="pts" step="0.5" min="0">
         <button class="btn small" id="settingsAddBtn">Add</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h4>Rewards shop</h4>
+      <div class="sheet-sub" style="margin-bottom:10px;">What points can be redeemed for. Shown in Season Stats.</div>
+      <ul class="chore-list" id="settingsRewardsList"></ul>
+      <div class="add-chore-form">
+        <input type="text" id="settingsRewardName" placeholder="New reward" maxlength="60">
+        <input type="number" id="settingsRewardCost" placeholder="pts" step="0.5" min="0">
+        <button class="btn small" id="settingsRewardAddBtn">Add</button>
       </div>
     </div>
 
@@ -1076,6 +1455,48 @@ function renderSettingsSheet(){
     saveState();
     renderSettingsSheet();
     showToast(`Added "${name}" to the playbook`);
+  };
+
+  const rewardsList = document.getElementById('settingsRewardsList');
+  state.rewards.forEach(r=>{
+    const li = document.createElement('li');
+    li.className = 'chore-row';
+    li.innerHTML = `
+      <input type="text" value="${escapeHtml(r.name)}" class="name-edit" style="flex:1;">
+      <input type="number" step="0.5" min="0" value="${r.cost}" style="width:60px;" class="pts-edit">
+      <button class="chore-del" title="Delete reward">🗑</button>
+    `;
+    const nameEdit = li.querySelector('.name-edit');
+    nameEdit.onchange = ()=>{
+      const v = nameEdit.value.trim();
+      if(v){ r.name = v; saveState(); showToast('Reward renamed'); }
+      else { nameEdit.value = r.name; }
+    };
+    const costEdit = li.querySelector('.pts-edit');
+    costEdit.onchange = ()=>{
+      const v = parseFloat(costEdit.value);
+      if(!isNaN(v) && v>=0){ r.cost = v; saveState(); showToast('Cost updated'); }
+    };
+    li.querySelector('.chore-del').onclick = ()=>{
+      if(confirm(`Delete "${r.name}" from the rewards shop?`)){
+        state.rewards = state.rewards.filter(x=>x.id!==r.id);
+        saveState();
+        renderSettingsSheet();
+        showToast('Reward removed');
+      }
+    };
+    rewardsList.appendChild(li);
+  });
+
+  document.getElementById('settingsRewardAddBtn').onclick = ()=>{
+    const name = document.getElementById('settingsRewardName').value.trim();
+    const cost = parseFloat(document.getElementById('settingsRewardCost').value);
+    if(!name){ showToast('Give the reward a name'); return; }
+    if(isNaN(cost) || cost<=0){ showToast('Enter a point cost'); return; }
+    state.rewards.push({id:uid(), name, cost});
+    saveState();
+    renderSettingsSheet();
+    showToast(`Added "${name}" to the rewards shop`);
   };
 
   const kidList = document.getElementById('settingsKidList');
