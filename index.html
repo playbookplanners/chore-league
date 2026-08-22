@@ -229,6 +229,20 @@
   .pin-hint{font-size:0.78rem;color:var(--ink-soft);text-align:center;margin-bottom:14px;}
   .lock-status-note{font-size:0.78rem;color:var(--ink-soft);margin-top:8px;}
 
+  /* ---------- Independent cash ledger ---------- */
+  .pts-only-tag{font-size:0.6rem;font-weight:600;color:var(--ink-soft);text-transform:none;letter-spacing:0;background:var(--chalk-dim);padding:1px 6px;border-radius:4px;margin-left:4px;vertical-align:middle;}
+  .cash-divider{
+    margin:24px 0 12px;padding-top:16px;border-top:2px dashed var(--chalk-dim);
+    font-family:'Oswald',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.05em;
+    color:var(--navy);text-transform:uppercase;
+  }
+  .cash-balance-card{
+    background:linear-gradient(135deg, #1f7a4d, #145c39);border-radius:12px;padding:14px 18px;
+    display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:var(--shadow);
+  }
+  .cash-balance-label{font-family:'Oswald',sans-serif;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;color:#cdeedb;}
+  .cash-balance-val{font-family:'Teko',sans-serif;font-weight:700;font-size:2.2rem;color:#fff;line-height:1;}
+
   /* ---------- Empty state ---------- */
   .empty-state{
     text-align:center;padding:50px 20px;color:var(--chalk-dim);
@@ -543,6 +557,11 @@ function fmtPts(p){
 function fmtMoney(pts){
   return '$' + (pts*POINT_VALUE).toFixed(2);
 }
+function fmtMoney2(amt){
+  const n = Math.round((amt||0)*100)/100;
+  const sign = n < 0 ? '-' : '';
+  return sign + '$' + Math.abs(n).toFixed(2);
+}
 function showToast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -596,7 +615,29 @@ async function saveState(){
 function ensureKidData(kidId){
   if(!state.bank[kidId]) state.bank[kidId] = {total:0, history:[], goal:null};
   if(state.bank[kidId].goal === undefined) state.bank[kidId].goal = null;
+  if(!state.bank[kidId].cash) state.bank[kidId].cash = {total:0, history:[]};
   if(!state.days[kidId]) state.days[kidId] = {};
+}
+
+/* ---------------- Points ledger (auto-mirrors to cash unless it's a reward redemption) ---------------- */
+function recordPointsChange(kidId, delta, note, opts){
+  opts = opts || {};
+  ensureKidData(kidId);
+  const bank = state.bank[kidId];
+  const cash = bank.cash;
+  const d = opts.date || todayStr();
+  const entryId = uid();
+  bank.total += delta;
+  const entry = {id: entryId, date: d, delta: delta, note: note, type: opts.type || 'manual'};
+  if(opts.mirrorToCash === false){ entry.kind = 'redeem'; }
+  bank.history.unshift(entry);
+
+  if(opts.mirrorToCash !== false){
+    const cashDelta = Math.round(delta * POINT_VALUE * 100) / 100;
+    cash.total = Math.round((cash.total + cashDelta) * 100) / 100;
+    cash.history.unshift({id: uid(), date: d, delta: cashDelta, note: 'Auto: ' + note, auto:true, sourceId: entryId});
+  }
+  return entry;
 }
 
 /* ---------------- Daily bonus challenge (rotates automatically) ---------------- */
@@ -724,7 +765,7 @@ function renderMain(){
       <div>
         <div class="who">${escapeHtml(kid.name)} — Season Stats</div>
         <div class="scoreboard"><div class="digits">${fmtPts(bank.total)}</div></div>
-        <div class="sub">${fmtMoney(bank.total)} banked ${streak > 0 ? `&middot; <span class="streak-badge">🔥 ${streak} day streak</span>` : ''}</div>
+        <div class="sub">${fmtPts(bank.total)} pts total ${streak > 0 ? `&middot; <span class="streak-badge">🔥 ${streak} day streak</span>` : ''}</div>
       </div>
       <div class="mini-links">
         <button class="mini-link" id="openBankBtn">📊 Stats</button>
@@ -806,13 +847,10 @@ function renderCalendar(kid){
     if(rec && rec.approved){
       cell.classList.add('played');
       inner += `<div class="win-ribbon">W ${fmtPts(dayPts)}</div>`;
-      inner += `<div class="day-money">${fmtMoney(dayPts)}</div>`;
     } else if(rec && rec.submitted){
       inner += `<div class="win-ribbon" style="background:linear-gradient(180deg,#eee,#ccc);color:var(--navy-dark);">⏳ WAIT</div>`;
-      inner += `<div class="day-money">${fmtMoney(dayPts)}</div>`;
     } else if(rec && rec.checked && rec.checked.length){
       inner += `<div class="progress" style="color:${kid.color}">+${fmtPts(dayPts)} pts</div>`;
-      inner += `<div class="day-money">${fmtMoney(dayPts)}</div>`;
     } else {
       inner += `<div class="dot"></div>`;
     }
@@ -954,10 +992,7 @@ function renderDaySheet(){
 
 function applyDayPenalty(pts, note){
   const kid = getKid(currentKidId);
-  ensureKidData(kid.id);
-  const bank = state.bank[kid.id];
-  bank.total -= pts;
-  bank.history.unshift({id:uid(), date:activeDayStr, delta:-pts, note, type:'manual'});
+  recordPointsChange(kid.id, -pts, note, {date: activeDayStr, type:'manual'});
   saveState();
   showToast('Points deducted');
   renderDaySheet();
@@ -1016,9 +1051,7 @@ function approveDay(){
   const pts = sumCheckedPoints(rec.checked, activeDayStr);
   rec.approved = true;
   rec.awardedPoints = pts;
-  ensureKidData(kid.id);
-  state.bank[kid.id].total += pts;
-  state.bank[kid.id].history.unshift({id:uid(), date:activeDayStr, delta:pts, note:'Game won', type:'approval'});
+  recordPointsChange(kid.id, pts, 'Game won', {date: activeDayStr, type:'approval'});
   if(!state.meta) state.meta = {approvalsSinceBackup:0, lastBackupAt:null, parentPin:null};
       if(state.meta.parentPin===undefined) state.meta.parentPin=null;
   state.meta.approvalsSinceBackup = (state.meta.approvalsSinceBackup||0) + 1;
@@ -1035,8 +1068,7 @@ function reopenDay(){
   rec.approved = false;
   rec.submitted = false;
   rec.awardedPoints = null;
-  state.bank[kid.id].total -= pts;
-  state.bank[kid.id].history.unshift({id:uid(), date:activeDayStr, delta:-pts, note:'Game reopened', type:'approval'});
+  recordPointsChange(kid.id, -pts, 'Game reopened', {date: activeDayStr, type:'approval'});
   saveState();
   renderDaySheet();
   render();
@@ -1120,34 +1152,33 @@ function renderBankSheet(){
   ensureKidData(kid.id);
   const bank = state.bank[kid.id];
   const ledger = computeLedger(bank);
+  const cash = bank.cash;
   const sheet = document.getElementById('bankSheet');
   sheet.innerHTML = `
     <div class="sheet-head">
       <div>
         <div class="sheet-title">SEASON STATS</div>
-        <div class="sheet-sub">${escapeHtml(kid.name)}'s point bank</div>
+        <div class="sheet-sub">${escapeHtml(kid.name)}'s points &amp; cash</div>
       </div>
       <button class="close-x" onclick="closeOverlay('bankOverlay')">✕</button>
     </div>
 
+    <span class="field-label" style="display:block;">🏅 Points (score — never converted to cash)</span>
     <div class="ledger-grid">
       <div class="ledger-tile">
         <div class="ledger-label">Earned</div>
         <div class="ledger-val earn">${fmtPts(ledger.earned)}</div>
-        <div class="ledger-sub">${fmtMoney(ledger.earned)}</div>
       </div>
       <div class="ledger-tile">
         <div class="ledger-label">Redeemed</div>
         <div class="ledger-val redeem">${fmtPts(ledger.redeemed)}</div>
-        <div class="ledger-sub">${fmtMoney(ledger.redeemed)}</div>
       </div>
       <div class="ledger-tile balance">
         <div class="ledger-label">Balance now</div>
         <div class="ledger-val bal">${fmtPts(ledger.balance)}</div>
-        <div class="ledger-sub">${fmtMoney(ledger.balance)}</div>
       </div>
     </div>
-    ${ledger.penalties > 0 ? `<div class="lock-status-note">Includes ${fmtPts(ledger.penalties)} pts (${fmtMoney(ledger.penalties)}) lost to penalties.</div>` : ''}
+    ${ledger.penalties > 0 ? `<div class="lock-status-note">Includes ${fmtPts(ledger.penalties)} pts lost to penalties.</div>` : ''}
 
     <span class="field-label" style="margin-top:16px;display:block;">🎯 Savings goal</span>
     ${(bank.goal && !goalEditMode) ? `
@@ -1165,17 +1196,10 @@ function renderBankSheet(){
     `}
 
     <div class="field-label-row" style="margin-top:16px;">
-      <span class="field-label" style="margin:0;">🛍️ Rewards shop</span>
+      <span class="field-label" style="margin:0;">🛍️ Rewards shop <span class="pts-only-tag">pts only</span></span>
       <button class="mini-link" id="manageRewardsBtn" style="text-align:right;">⚙ Manage</button>
     </div>
     <div id="rewardsShopList" class="rewards-shop"></div>
-
-    <span class="field-label" style="margin-top:16px;display:block;">💵 Redeem points (cash out / spend)</span>
-    <div class="adjust-form">
-      <input type="number" id="redeemPts" placeholder="e.g. 10" step="0.5" min="0">
-      <input type="text" id="redeemNote" placeholder="What for? (e.g. cashed out for $5)" maxlength="60">
-      <button class="btn small primary" id="redeemBtn">Redeem</button>
-    </div>
 
     <span class="field-label">Bonus / penalty (add or remove points)</span>
     <div class="adjust-form">
@@ -1185,8 +1209,26 @@ function renderBankSheet(){
       <button class="btn small primary" id="adjustBtn">Apply</button>
     </div>
 
-    <span class="field-label">Play-by-play</span>
+    <span class="field-label">Play-by-play (points)</span>
     <ul class="history-list" id="historyList"></ul>
+
+    <div class="cash-divider">💵 CASH — own balance, auto-tracks $${POINT_VALUE.toFixed(2)}/pt as points are earned or penalized</div>
+
+    <div class="cash-balance-card">
+      <div class="cash-balance-label">Cash balance</div>
+      <div class="cash-balance-val">${fmtMoney2(cash.total)}</div>
+    </div>
+
+    <span class="field-label" style="margin-top:14px;display:block;">Add or take out cash (for allowance, corrections, etc.)</span>
+    <div class="adjust-form">
+      <input type="date" id="cashDate" value="${todayStr()}" style="flex:0 0 140px;">
+      <input type="number" id="cashAmt" placeholder="e.g. -5 or 10" step="0.01">
+      <input type="text" id="cashNote" placeholder="Reason (e.g. paid out allowance)" maxlength="60">
+      <button class="btn small primary" id="cashBtn">Apply</button>
+    </div>
+
+    <span class="field-label">Cash history <span class="pts-only-tag">AUTO entries mirror points — undo those from Play-by-play above</span></span>
+    <ul class="history-list" id="cashHistoryList"></ul>
   `;
 
   document.getElementById('manageRewardsBtn').onclick = ()=>requirePin(()=>{
@@ -1206,8 +1248,7 @@ function renderBankSheet(){
       item.innerHTML = `<span>${escapeHtml(r.name)}</span><span class="reward-cost">${fmtPts(r.cost)} pts</span>`;
       item.onclick = ()=>requirePin(()=>{
         if(!confirm(`Redeem "${r.name}" for ${fmtPts(r.cost)} pts?`)) return;
-        bank.total -= r.cost;
-        bank.history.unshift({id:uid(), date: todayStr(), delta: -r.cost, note: r.name, type:'manual', kind:'redeem'});
+        recordPointsChange(kid.id, -r.cost, r.name, {mirrorToCash:false});
         saveState();
         renderBankSheet();
         render();
@@ -1266,26 +1307,47 @@ function renderBankSheet(){
     const note = document.getElementById('adjustNote').value.trim() || (val>=0?'Bonus points':'Penalty');
     const dateVal = document.getElementById('adjustDate').value || todayStr();
     if(isNaN(val) || val===0){ showToast('Enter a point amount'); return; }
-    bank.total += val;
-    bank.history.unshift({id:uid(), date: dateVal, delta: val, note, type:'manual'});
+    recordPointsChange(kid.id, val, note, {date: dateVal});
     saveState();
     renderBankSheet();
     render();
     showToast(val>0?'Points added':'Points removed');
   });
-  document.getElementById('redeemBtn').onclick = ()=>requirePin(()=>{
-    const val = parseFloat(document.getElementById('redeemPts').value);
-    const note = document.getElementById('redeemNote').value.trim() || 'Redeemed';
-    if(isNaN(val) || val<=0){ showToast('Enter how many points to redeem'); return; }
-    if(val > bank.total){
-      if(!confirm(`This is more than the current balance (${fmtPts(bank.total)} pts). Redeem anyway?`)) return;
-    }
-    bank.total -= val;
-    bank.history.unshift({id:uid(), date: todayStr(), delta: -val, note, type:'manual', kind:'redeem'});
+
+  const cashList = document.getElementById('cashHistoryList');
+  if(!cash.history.length){
+    cashList.innerHTML = `<div style="color:var(--ink-soft);font-size:0.85rem;padding:8px 2px;">No cash tracked yet.</div>`;
+  } else {
+    cash.history.forEach(h=>{
+      const row = document.createElement('li');
+      row.className = 'history-row';
+      const tag = h.auto
+        ? '<span class="hist-tag" style="background:#eef1fb;color:var(--blue,#2c6fe0);">AUTO</span>'
+        : (h.delta>=0 ? '<span class="hist-tag earn">ADDED</span>' : '<span class="hist-tag penalty">PAID OUT</span>');
+      row.innerHTML = `
+        <span class="note">${tag} ${escapeHtml(h.note)}<span class="date">${shortDate(h.date)}</span></span>
+        <span style="display:flex;align-items:center;gap:8px;">
+          <span class="delta ${h.delta>=0?'pos':'neg'}">${h.delta>=0?'+':''}${fmtMoney2(h.delta)}</span>
+          ${h.auto ? '' : `<button class="chore-del undo-cash-btn" data-id="${h.id}" title="Undo this entry">🗑</button>`}
+        </span>
+      `;
+      cashList.appendChild(row);
+    });
+    cashList.querySelectorAll('.undo-cash-btn').forEach(btn=>{
+      btn.onclick = ()=>requirePin(()=>undoCashEntry(btn.dataset.id));
+    });
+  }
+  document.getElementById('cashBtn').onclick = ()=>requirePin(()=>{
+    const val = parseFloat(document.getElementById('cashAmt').value);
+    const note = document.getElementById('cashNote').value.trim() || (val>=0?'Cash added':'Cash paid out');
+    const dateVal = document.getElementById('cashDate').value || todayStr();
+    if(isNaN(val) || val===0){ showToast('Enter a cash amount'); return; }
+    cash.total = Math.round((cash.total+val)*100)/100;
+    cash.history.unshift({id:uid(), date: dateVal, delta: val, note});
     saveState();
     renderBankSheet();
     render();
-    showToast('Points redeemed');
+    showToast(val>0?'Cash added':'Cash recorded as paid out');
   });
 }
 
@@ -1293,11 +1355,33 @@ function undoHistoryEntry(entryId){
   const kid = getKid(currentKidId);
   ensureKidData(kid.id);
   const bank = state.bank[kid.id];
+  const cash = bank.cash;
   const entry = bank.history.find(h=>h.id===entryId);
   if(!entry) return;
-  if(!confirm(`Undo "${entry.note}" (${entry.delta>=0?'+':''}${fmtPts(entry.delta)})? This removes it from the total and the log.`)) return;
+  const linkedCash = cash.history.find(h=>h.sourceId===entryId);
+  const cashNote = linkedCash ? ` This also removes the matching cash entry (${linkedCash.delta>=0?'+':''}${fmtMoney2(linkedCash.delta)}).` : '';
+  if(!confirm(`Undo "${entry.note}" (${entry.delta>=0?'+':''}${fmtPts(entry.delta)})?${cashNote} This removes it from the total and the log.`)) return;
   bank.total -= entry.delta;
   bank.history = bank.history.filter(h=>h.id!==entryId);
+  if(linkedCash){
+    cash.total = Math.round((cash.total - linkedCash.delta) * 100) / 100;
+    cash.history = cash.history.filter(h=>h.id!==linkedCash.id);
+  }
+  saveState();
+  renderBankSheet();
+  render();
+  showToast('Entry undone');
+}
+
+function undoCashEntry(entryId){
+  const kid = getKid(currentKidId);
+  ensureKidData(kid.id);
+  const cash = state.bank[kid.id].cash;
+  const entry = cash.history.find(h=>h.id===entryId);
+  if(!entry) return;
+  if(!confirm(`Undo "${entry.note}" (${entry.delta>=0?'+':''}${fmtMoney2(entry.delta)})? This removes it from cash and the log.`)) return;
+  cash.total = Math.round((cash.total - entry.delta)*100)/100;
+  cash.history = cash.history.filter(h=>h.id!==entryId);
   saveState();
   renderBankSheet();
   render();
@@ -1342,12 +1426,10 @@ function renderRecapSheet(){
       <div class="ledger-tile">
         <div class="ledger-label">This week</div>
         <div class="ledger-val earn">${fmtPts(thisStats.total)}</div>
-        <div class="ledger-sub">${fmtMoney(thisStats.total)}</div>
       </div>
       <div class="ledger-tile">
         <div class="ledger-label">Last week</div>
         <div class="ledger-val" style="color:var(--ink-soft);">${fmtPts(lastStats.total)}</div>
-        <div class="ledger-sub">${fmtMoney(lastStats.total)}</div>
       </div>
       <div class="ledger-tile balance">
         <div class="ledger-label">Change</div>
