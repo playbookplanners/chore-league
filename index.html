@@ -36,7 +36,7 @@
     min-height:100vh;
     -webkit-font-smoothing:antialiased;
   }
-  .frame{max-width:920px;margin:0 auto;padding:20px 16px 60px;}
+  .frame{max-width:920px;margin:0 auto;padding:20px 16px 100px;}
 
   /* ---------- Header ---------- */
   header.top{
@@ -96,34 +96,62 @@
   .icon-btn{border:none;background:transparent;font-size:1.1rem;color:var(--ink-soft);padding:4px 8px;border-radius:7px;}
 
   /* ---------- Kid roster tabs ---------- */
-  .kid-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:stretch;}
-  .kid-tab{
-    display:flex;align-items:center;gap:10px;
-    padding:8px 16px 8px 8px;
-    border-radius:10px;
-    border:2px solid transparent;
-    background:var(--navy);
-    box-shadow:var(--shadow);
-    position:relative;
+  .kid-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;align-items:flex-start;justify-content:center;}
+  .kid-avatar-btn{
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    background:transparent;border:none;padding:4px;cursor:pointer;
+    width:78px;
   }
-  .kid-tab.active{border-color:var(--gold);}
-  .kid-tab.dim{opacity:0.55;}
-  .kid-tab .jersey{
-    width:34px;height:34px;border-radius:8px;
+  .kid-avatar-circle{
+    width:64px;height:64px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
-    color:#fff;font-weight:800;font-family:'Teko',sans-serif;font-size:1.2rem;
-    box-shadow:inset 0 0 0 2px rgba(255,255,255,0.3);
+    color:#fff;font-weight:800;font-family:'Teko',sans-serif;font-size:1.8rem;
+    box-shadow:0 3px 0 rgba(0,0,0,0.25), 0 6px 14px -4px rgba(0,0,0,0.4);
+    border:3px solid rgba(255,255,255,0.25);
+    transition:transform .15s ease, box-shadow .15s ease;
   }
-  .kid-tab .kid-name{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:0.85rem;letter-spacing:0.02em;color:var(--chalk);}
-  .kid-tab .pts-chip{font-size:0.7rem;color:var(--gold);font-weight:700;font-family:'Inter';display:block;}
-  .add-kid-tab{
-    display:flex;align-items:center;gap:6px;
-    padding:8px 16px;border-radius:10px;
-    border:2px dashed rgba(255,255,255,0.3);
-    background:transparent;color:var(--chalk-dim);
-    font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:0.8rem;letter-spacing:0.02em;
+  .kid-avatar-btn.active .kid-avatar-circle{
+    border-color:var(--gold);
+    box-shadow:0 0 0 4px rgba(247,181,0,0.35), 0 3px 0 rgba(0,0,0,0.25);
+    transform:translateY(-2px) scale(1.06);
   }
-  .add-kid-tab:hover{border-color:var(--gold);color:var(--gold);}
+  .kid-avatar-btn:not(.active){opacity:0.6;}
+  .kid-avatar-btn:hover{opacity:1;}
+  .kid-avatar-name{
+    font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;
+    font-size:0.75rem;letter-spacing:0.02em;color:var(--chalk);
+  }
+  .kid-avatar-btn.add .kid-avatar-circle.add-circle{
+    background:transparent;border:3px dashed rgba(255,255,255,0.35);color:var(--chalk-dim);font-size:1.6rem;
+    box-shadow:none;
+  }
+  .kid-avatar-btn.add .kid-avatar-name{color:var(--chalk-dim);}
+
+  /* ---------- Bottom nav ---------- */
+  .bottom-nav{
+    position:fixed;bottom:0;left:0;right:0;z-index:40;
+    display:flex;justify-content:space-around;align-items:stretch;
+    background:var(--navy);border-top:3px solid var(--gold);
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    box-shadow:0 -6px 18px rgba(0,0,0,0.35);
+  }
+  .nav-btn-main{
+    flex:1;max-width:110px;display:flex;flex-direction:column;align-items:center;gap:2px;
+    background:transparent;border:none;color:var(--chalk-dim);padding:8px 4px 6px;
+    border-radius:10px;cursor:pointer;transition:background .15s ease, color .15s ease;
+  }
+  .nav-btn-main .nav-icon{font-size:1.4rem;line-height:1;}
+  .nav-btn-main .nav-label{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;font-size:0.6rem;letter-spacing:0.03em;}
+  .nav-btn-main:hover{background:rgba(255,255,255,0.06);color:var(--chalk);}
+  .nav-btn-main.active{color:var(--gold);}
+
+  /* ---------- Cash glance on home ---------- */
+  .cash-glance{
+    background:rgba(63,181,121,0.15);border:2px solid #3fb579;border-radius:12px;
+    padding:10px 16px;text-align:center;min-width:90px;
+  }
+  .cash-glance-label{font-family:'Oswald',sans-serif;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.04em;color:#8fe0b3;}
+  .cash-glance-val{font-family:'Teko',sans-serif;font-weight:700;font-size:1.6rem;color:#5fd694;line-height:1.1;}
 
   /* ---------- Scoreboard strip ---------- */
   .bank-strip{
@@ -403,6 +431,16 @@
   .mini-link:hover{opacity:1;}
   .field-label-row{display:flex;justify-content:space-between;align-items:center;}
   .field-label-row .mini-link{color:var(--gold-dark);}
+
+  .tab-row{display:flex;gap:0;margin-bottom:16px;border-radius:10px;overflow:hidden;border:2px solid var(--navy);}
+  .tab-btn{
+    flex:1;padding:10px 8px;border:none;background:#fff;color:var(--ink-soft);
+    font-family:'Oswald',sans-serif;font-weight:700;font-size:0.82rem;letter-spacing:0.02em;
+    cursor:pointer;transition:background .15s ease;
+  }
+  .tab-btn.active{background:var(--navy);color:#fff;}
+  .tab-btn:not(.active):hover{background:#f5f5ee;}
+  .tab-explainer{font-size:0.8rem;color:var(--ink-soft);background:#fafaf5;border:1.5px dashed var(--chalk-dim);border-radius:9px;padding:10px 12px;margin-bottom:14px;}
   .adjust-form input[type=number]{width:80px;}
   .adjust-form input[type=text]{flex:1;min-width:140px;}
 
@@ -459,16 +497,31 @@
         <div class="tagline">No nagging. No excuses. Get in the game.</div>
       </div>
     </div>
-    <div class="top-actions">
-      <button class="btn ghost" id="lockBtn" title="Parent lock">🔒</button>
-      <button class="btn ghost" id="settingsBtn">⚙ Playbook</button>
-    </div>
+    <button class="btn ghost" id="lockBtn" title="Parent lock">🔒</button>
   </header>
 
   <div class="kid-row" id="kidRow"></div>
 
   <div id="mainArea"></div>
 </div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn-main active" id="navHome">
+    <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
+  </button>
+  <button class="nav-btn-main" id="navPoints">
+    <span class="nav-icon">🏅</span><span class="nav-label">Points</span>
+  </button>
+  <button class="nav-btn-main" id="navCash">
+    <span class="nav-icon">💵</span><span class="nav-label">Cash</span>
+  </button>
+  <button class="nav-btn-main" id="navRecap">
+    <span class="nav-icon">🏆</span><span class="nav-label">Recap</span>
+  </button>
+  <button class="nav-btn-main" id="navMore">
+    <span class="nav-icon">⚙️</span><span class="nav-label">More</span>
+  </button>
+</nav>
 
 <div class="toast" id="toast"></div>
 
@@ -482,9 +535,14 @@
   <div class="sheet" id="kidSheet"></div>
 </div>
 
-<!-- Bank sheet -->
+<!-- Points sheet -->
 <div class="overlay" id="bankOverlay">
   <div class="sheet" id="bankSheet"></div>
+</div>
+
+<!-- Cash sheet (fully separate from Points) -->
+<div class="overlay" id="cashOverlay">
+  <div class="sheet" id="cashSheet"></div>
 </div>
 
 <!-- Settings sheet -->
@@ -578,6 +636,7 @@ const BACKUP_REMINDER_THRESHOLD = 5;
 let bannerDismissed = false;
 let parentUnlocked = false;
 let goalEditMode = false;
+let bankTab = 'points';
 
 async function loadState(){
   try{
@@ -719,18 +778,17 @@ function renderKidRow(){
   state.kids.forEach(k=>{
     ensureKidData(k.id);
     const btn = document.createElement('button');
-    btn.className = 'kid-tab' + (k.id===currentKidId?' active':' dim');
-    btn.innerHTML = `<span class="jersey" style="background:${k.color}">${jerseyNum(k.id)}</span>
-      <span>
-        <span class="kid-name">${escapeHtml(k.name)}</span>
-        <span class="pts-chip">${fmtPts(state.bank[k.id].total)} PTS</span>
-      </span>`;
+    btn.className = 'kid-avatar-btn' + (k.id===currentKidId?' active':'');
+    btn.innerHTML = `
+      <span class="kid-avatar-circle" style="background:${k.color}">${jerseyNum(k.id)}</span>
+      <span class="kid-avatar-name">${escapeHtml(k.name)}</span>
+    `;
     btn.onclick = ()=>{ currentKidId = k.id; render(); };
     row.appendChild(btn);
   });
   const addBtn = document.createElement('button');
-  addBtn.className = 'add-kid-tab';
-  addBtn.innerHTML = '+ Add player';
+  addBtn.className = 'kid-avatar-btn add';
+  addBtn.innerHTML = `<span class="kid-avatar-circle add-circle">+</span><span class="kid-avatar-name">Add</span>`;
   addBtn.onclick = openAddKid;
   row.appendChild(addBtn);
 }
@@ -763,13 +821,13 @@ function renderMain(){
     </div>` : ''}
     <div class="bank-strip">
       <div>
-        <div class="who">${escapeHtml(kid.name)} — Season Stats</div>
+        <div class="who">${escapeHtml(kid.name)}'s Scoreboard</div>
         <div class="scoreboard"><div class="digits">${fmtPts(bank.total)}</div></div>
-        <div class="sub">${fmtPts(bank.total)} pts total ${streak > 0 ? `&middot; <span class="streak-badge">🔥 ${streak} day streak</span>` : ''}</div>
+        <div class="sub">pts ${streak > 0 ? `&middot; <span class="streak-badge">🔥 ${streak} day streak</span>` : ''}</div>
       </div>
-      <div class="mini-links">
-        <button class="mini-link" id="openBankBtn">📊 Stats</button>
-        <button class="mini-link" id="recapBtn">🏆 Recap</button>
+      <div class="cash-glance">
+        <div class="cash-glance-label">💵 Cash</div>
+        <div class="cash-glance-val">${fmtMoney2(state.bank[kid.id].cash.total)}</div>
       </div>
     </div>
 
@@ -803,8 +861,6 @@ function renderMain(){
     document.getElementById('bannerDismissBtn').onclick = ()=>{ bannerDismissed = true; render(); };
   }
 
-  document.getElementById('openBankBtn').onclick = ()=>openBank(kid.id);
-  document.getElementById('recapBtn').onclick = openRecap;
   document.getElementById('prevMonth').onclick = ()=>{ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderMain(); };
   document.getElementById('nextMonth').onclick = ()=>{ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderMain(); };
   document.getElementById('todayBtn').onclick = ()=>{ const n=new Date(); calMonth=n.getMonth(); calYear=n.getFullYear(); renderMain(); };
@@ -1136,6 +1192,14 @@ function openBank(kidId){
   overlay.onclick = (e)=>{ if(e.target===overlay) closeOverlay('bankOverlay'); };
 }
 
+function openCash(kidId){
+  currentKidId = kidId;
+  const overlay = document.getElementById('cashOverlay');
+  overlay.classList.add('open');
+  renderCashSheet();
+  overlay.onclick = (e)=>{ if(e.target===overlay) closeOverlay('cashOverlay'); };
+}
+
 function computeLedger(bank){
   let earned = 0, redeemed = 0, penalties = 0;
   bank.history.forEach(h=>{
@@ -1147,23 +1211,23 @@ function computeLedger(bank){
   return {earned, redeemed, penalties, balance: bank.total};
 }
 
+/* ===================== POINTS SHEET (fully separate from Cash) ===================== */
 function renderBankSheet(){
   const kid = getKid(currentKidId);
   ensureKidData(kid.id);
   const bank = state.bank[kid.id];
   const ledger = computeLedger(bank);
-  const cash = bank.cash;
   const sheet = document.getElementById('bankSheet');
+
   sheet.innerHTML = `
     <div class="sheet-head">
       <div>
-        <div class="sheet-title">SEASON STATS</div>
-        <div class="sheet-sub">${escapeHtml(kid.name)}'s points &amp; cash</div>
+        <div class="sheet-title" style="color:var(--gold-dark);">🏅 POINTS</div>
+        <div class="sheet-sub">${escapeHtml(kid.name)}'s score — separate from cash</div>
       </div>
       <button class="close-x" onclick="closeOverlay('bankOverlay')">✕</button>
     </div>
 
-    <span class="field-label" style="display:block;">🏅 Points (score — never converted to cash)</span>
     <div class="ledger-grid">
       <div class="ledger-tile">
         <div class="ledger-label">Earned</div>
@@ -1196,39 +1260,21 @@ function renderBankSheet(){
     `}
 
     <div class="field-label-row" style="margin-top:16px;">
-      <span class="field-label" style="margin:0;">🛍️ Rewards shop <span class="pts-only-tag">pts only</span></span>
+      <span class="field-label" style="margin:0;">🛍️ Rewards shop</span>
       <button class="mini-link" id="manageRewardsBtn" style="text-align:right;">⚙ Manage</button>
     </div>
     <div id="rewardsShopList" class="rewards-shop"></div>
 
-    <span class="field-label">Bonus / penalty (add or remove points)</span>
+    <span class="field-label">Add or remove points</span>
     <div class="adjust-form">
       <input type="date" id="adjustDate" value="${todayStr()}" style="flex:0 0 140px;">
       <input type="number" id="adjustPts" placeholder="e.g. -2 or 3" step="0.5">
-      <input type="text" id="adjustNote" placeholder="Reason (e.g. left towel on floor)" maxlength="60">
+      <input type="text" id="adjustNote" placeholder="Reason (e.g. great attitude at practice)" maxlength="60">
       <button class="btn small primary" id="adjustBtn">Apply</button>
     </div>
 
-    <span class="field-label">Play-by-play (points)</span>
+    <span class="field-label">Points history</span>
     <ul class="history-list" id="historyList"></ul>
-
-    <div class="cash-divider">💵 CASH — own balance, auto-tracks $${POINT_VALUE.toFixed(2)}/pt as points are earned or penalized</div>
-
-    <div class="cash-balance-card">
-      <div class="cash-balance-label">Cash balance</div>
-      <div class="cash-balance-val">${fmtMoney2(cash.total)}</div>
-    </div>
-
-    <span class="field-label" style="margin-top:14px;display:block;">Add or take out cash (for allowance, corrections, etc.)</span>
-    <div class="adjust-form">
-      <input type="date" id="cashDate" value="${todayStr()}" style="flex:0 0 140px;">
-      <input type="number" id="cashAmt" placeholder="e.g. -5 or 10" step="0.01">
-      <input type="text" id="cashNote" placeholder="Reason (e.g. paid out allowance)" maxlength="60">
-      <button class="btn small primary" id="cashBtn">Apply</button>
-    </div>
-
-    <span class="field-label">Cash history <span class="pts-only-tag">AUTO entries mirror points — undo those from Play-by-play above</span></span>
-    <ul class="history-list" id="cashHistoryList"></ul>
   `;
 
   document.getElementById('manageRewardsBtn').onclick = ()=>requirePin(()=>{
@@ -1245,10 +1291,21 @@ function renderBankSheet(){
       const item = document.createElement('button');
       item.className = 'reward-item';
       item.disabled = !canAfford;
-      item.innerHTML = `<span>${escapeHtml(r.name)}</span><span class="reward-cost">${fmtPts(r.cost)} pts</span>`;
+      const unitLabel = r.perUnit ? ` / ${escapeHtml(r.perUnit)}` : '';
+      item.innerHTML = `<span>${escapeHtml(r.name)}</span><span class="reward-cost">${fmtPts(r.cost)} pts${unitLabel}</span>`;
       item.onclick = ()=>requirePin(()=>{
-        if(!confirm(`Redeem "${r.name}" for ${fmtPts(r.cost)} pts?`)) return;
-        recordPointsChange(kid.id, -r.cost, r.name, {mirrorToCash:false});
+        if(r.perUnit){
+          const qtyStr = prompt(`How many ${r.perUnit}(s) of "${r.name}"? (${fmtPts(r.cost)} pts each)`, '1');
+          if(qtyStr === null) return;
+          const qty = parseFloat(qtyStr);
+          if(isNaN(qty) || qty<=0){ showToast('Enter a valid amount'); return; }
+          const totalCost = Math.round(qty * r.cost * 100) / 100;
+          if(!confirm(`Redeem ${qty} ${r.perUnit}(s) of "${r.name}" for ${fmtPts(totalCost)} pts?`)) return;
+          recordPointsChange(kid.id, -totalCost, `${r.name} (${qty} ${r.perUnit}${qty!==1?'s':''})`, {mirrorToCash:false});
+        } else {
+          if(!confirm(`Redeem "${r.name}" for ${fmtPts(r.cost)} pts?`)) return;
+          recordPointsChange(kid.id, -r.cost, r.name, {mirrorToCash:false});
+        }
         saveState();
         renderBankSheet();
         render();
@@ -1313,6 +1370,41 @@ function renderBankSheet(){
     render();
     showToast(val>0?'Points added':'Points removed');
   });
+}
+
+/* ===================== CASH SHEET (fully separate from Points) ===================== */
+function renderCashSheet(){
+  const kid = getKid(currentKidId);
+  ensureKidData(kid.id);
+  const cash = state.bank[kid.id].cash;
+  const sheet = document.getElementById('cashSheet');
+
+  sheet.innerHTML = `
+    <div class="sheet-head">
+      <div>
+        <div class="sheet-title" style="color:#3fb579;">💵 CASH</div>
+        <div class="sheet-sub">${escapeHtml(kid.name)}'s money — separate from points</div>
+      </div>
+      <button class="close-x" onclick="closeOverlay('cashOverlay')">✕</button>
+    </div>
+
+    <div class="cash-balance-card">
+      <div class="cash-balance-label">Cash balance</div>
+      <div class="cash-balance-val">${fmtMoney2(cash.total)}</div>
+    </div>
+    <div class="tab-explainer" style="margin-top:12px;">Grows automatically at $${POINT_VALUE.toFixed(2)} per point earned or lost. Add or take out cash below any time — allowance, payouts, corrections.</div>
+
+    <span class="field-label" style="margin-top:14px;display:block;">Add or take out cash</span>
+    <div class="adjust-form">
+      <input type="date" id="cashDate" value="${todayStr()}" style="flex:0 0 140px;">
+      <input type="number" id="cashAmt" placeholder="e.g. -5 or 10" step="0.01">
+      <input type="text" id="cashNote" placeholder="Reason (e.g. paid out allowance)" maxlength="60">
+      <button class="btn small primary" id="cashBtn">Apply</button>
+    </div>
+
+    <span class="field-label">Cash history</span>
+    <ul class="history-list" id="cashHistoryList"></ul>
+  `;
 
   const cashList = document.getElementById('cashHistoryList');
   if(!cash.history.length){
@@ -1322,7 +1414,7 @@ function renderBankSheet(){
       const row = document.createElement('li');
       row.className = 'history-row';
       const tag = h.auto
-        ? '<span class="hist-tag" style="background:#eef1fb;color:var(--blue,#2c6fe0);">AUTO</span>'
+        ? '<span class="hist-tag" style="background:#eef1fb;color:var(--blue,#2c6fe0);">AUTO (from points)</span>'
         : (h.delta>=0 ? '<span class="hist-tag earn">ADDED</span>' : '<span class="hist-tag penalty">PAID OUT</span>');
       row.innerHTML = `
         <span class="note">${tag} ${escapeHtml(h.note)}<span class="date">${shortDate(h.date)}</span></span>
@@ -1345,7 +1437,7 @@ function renderBankSheet(){
     cash.total = Math.round((cash.total+val)*100)/100;
     cash.history.unshift({id:uid(), date: dateVal, delta: val, note});
     saveState();
-    renderBankSheet();
+    renderCashSheet();
     render();
     showToast(val>0?'Cash added':'Cash recorded as paid out');
   });
@@ -1459,7 +1551,11 @@ function renderRecapSheet(){
 }
 
 /* ---------------- SETTINGS SHEET (playbook + roster) ---------------- */
-document.getElementById('settingsBtn').onclick = ()=>requirePin(openSettings);
+document.getElementById('navHome').onclick = ()=>{ closeOverlay('dayOverlay'); closeOverlay('bankOverlay'); closeOverlay('cashOverlay'); closeOverlay('recapOverlay'); closeOverlay('settingsOverlay'); };
+document.getElementById('navPoints').onclick = ()=>{ if(currentKidId) openBank(currentKidId); else showToast('Add a player first'); };
+document.getElementById('navCash').onclick = ()=>{ if(currentKidId) openCash(currentKidId); else showToast('Add a player first'); };
+document.getElementById('navRecap').onclick = ()=>{ if(currentKidId) openRecap(); else showToast('Add a player first'); };
+document.getElementById('navMore').onclick = ()=>requirePin(openSettings);
 function openSettings(){
   const overlay = document.getElementById('settingsOverlay');
   overlay.classList.add('open');
@@ -1487,11 +1583,12 @@ function renderSettingsSheet(){
 
     <div class="settings-section">
       <h4>Rewards shop</h4>
-      <div class="sheet-sub" style="margin-bottom:10px;">What points can be redeemed for. Shown in Season Stats.</div>
+      <div class="sheet-sub" style="margin-bottom:10px;">What points can be redeemed for. Shown in Season Stats. Leave "per" blank for a one-time reward, or fill it in for things like Xbox time (e.g. "hour") so it asks how many when redeemed.</div>
       <ul class="chore-list" id="settingsRewardsList"></ul>
       <div class="add-chore-form">
-        <input type="text" id="settingsRewardName" placeholder="New reward" maxlength="60">
+        <input type="text" id="settingsRewardName" placeholder="New reward (e.g. Xbox time)" maxlength="60">
         <input type="number" id="settingsRewardCost" placeholder="pts" step="0.5" min="0">
+        <input type="text" id="settingsRewardUnit" placeholder="per (optional, e.g. hour)" maxlength="20" style="width:110px;">
         <button class="btn small" id="settingsRewardAddBtn">Add</button>
       </div>
     </div>
@@ -1573,6 +1670,7 @@ function renderSettingsSheet(){
     li.innerHTML = `
       <input type="text" value="${escapeHtml(r.name)}" class="name-edit" style="flex:1;">
       <input type="number" step="0.5" min="0" value="${r.cost}" style="width:60px;" class="pts-edit">
+      <input type="text" value="${r.perUnit ? escapeHtml(r.perUnit) : ''}" placeholder="per..." class="unit-edit" style="width:80px;">
       <button class="chore-del" title="Delete reward">🗑</button>
     `;
     const nameEdit = li.querySelector('.name-edit');
@@ -1585,6 +1683,13 @@ function renderSettingsSheet(){
     costEdit.onchange = ()=>{
       const v = parseFloat(costEdit.value);
       if(!isNaN(v) && v>=0){ r.cost = v; saveState(); showToast('Cost updated'); }
+    };
+    const unitEdit = li.querySelector('.unit-edit');
+    unitEdit.onchange = ()=>{
+      const v = unitEdit.value.trim();
+      r.perUnit = v || null;
+      saveState();
+      showToast(v ? `Now priced per ${v}` : 'Now a one-time reward');
     };
     li.querySelector('.chore-del').onclick = ()=>{
       if(confirm(`Delete "${r.name}" from the rewards shop?`)){
@@ -1600,9 +1705,10 @@ function renderSettingsSheet(){
   document.getElementById('settingsRewardAddBtn').onclick = ()=>{
     const name = document.getElementById('settingsRewardName').value.trim();
     const cost = parseFloat(document.getElementById('settingsRewardCost').value);
+    const perUnit = document.getElementById('settingsRewardUnit').value.trim() || null;
     if(!name){ showToast('Give the reward a name'); return; }
     if(isNaN(cost) || cost<=0){ showToast('Enter a point cost'); return; }
-    state.rewards.push({id:uid(), name, cost});
+    state.rewards.push({id:uid(), name, cost, perUnit});
     saveState();
     renderSettingsSheet();
     showToast(`Added "${name}" to the rewards shop`);
