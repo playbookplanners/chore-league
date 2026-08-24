@@ -121,61 +121,140 @@
     font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;
     font-size:0.75rem;letter-spacing:0.02em;color:var(--chalk);
   }
-  .kid-avatar-btn.add .kid-avatar-circle.add-circle{
-    background:transparent;border:3px dashed rgba(255,255,255,0.35);color:var(--chalk-dim);font-size:1.6rem;
-    box-shadow:none;
+  .kid-add-mini{
+    align-self:center;
+    width:30px;height:30px;border-radius:50%;
+    background:transparent;border:2px dashed rgba(255,255,255,0.3);
+    color:var(--chalk-dim);font-size:1rem;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;margin-top:2px;
+    transition:border-color .15s ease, color .15s ease;
   }
-  .kid-avatar-btn.add .kid-avatar-name{color:var(--chalk-dim);}
+  .kid-add-mini:hover{border-color:var(--gold);color:var(--gold);}
 
   /* ---------- Bottom nav ---------- */
   .bottom-nav{
     position:fixed;bottom:0;left:0;right:0;z-index:40;
     display:flex;justify-content:space-around;align-items:stretch;
-    background:var(--navy);border-top:3px solid var(--gold);
-    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
-    box-shadow:0 -6px 18px rgba(0,0,0,0.35);
+    background:var(--navy);border-top:4px solid var(--gold);
+    padding:8px 4px calc(8px + env(safe-area-inset-bottom));
+    box-shadow:0 -8px 20px rgba(0,0,0,0.4);
   }
   .nav-btn-main{
-    flex:1;max-width:110px;display:flex;flex-direction:column;align-items:center;gap:2px;
-    background:transparent;border:none;color:var(--chalk-dim);padding:8px 4px 6px;
-    border-radius:10px;cursor:pointer;transition:background .15s ease, color .15s ease;
+    flex:1;max-width:120px;display:flex;flex-direction:column;align-items:center;gap:3px;
+    background:transparent;border:none;color:var(--chalk-dim);padding:4px 2px 4px;
+    border-radius:14px;cursor:pointer;transition:transform .12s ease;
   }
-  .nav-btn-main .nav-icon{font-size:1.4rem;line-height:1;}
-  .nav-btn-main .nav-label{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;font-size:0.6rem;letter-spacing:0.03em;}
-  .nav-btn-main:hover{background:rgba(255,255,255,0.06);color:var(--chalk);}
+  .nav-btn-main .nav-icon-bubble{
+    width:48px;height:48px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.7rem;line-height:1;
+    background:rgba(255,255,255,0.08);
+    border:2.5px solid transparent;
+    transition:background .15s ease, border-color .15s ease, transform .12s ease;
+  }
+  .nav-btn-main:active .nav-icon-bubble{transform:scale(0.88);}
+  .nav-btn-main:nth-child(1) .nav-icon-bubble{background:rgba(247,181,0,0.16);}
+  .nav-btn-main:nth-child(2) .nav-icon-bubble{background:rgba(247,181,0,0.16);}
+  .nav-btn-main:nth-child(3) .nav-icon-bubble{background:rgba(63,181,121,0.2);}
+  .nav-btn-main:nth-child(4) .nav-icon-bubble{background:rgba(232,67,58,0.18);}
+  .nav-btn-main:nth-child(5) .nav-icon-bubble{background:rgba(255,255,255,0.1);}
+  .nav-btn-main .nav-label{font-family:'Oswald',sans-serif;font-weight:800;text-transform:uppercase;font-size:0.68rem;letter-spacing:0.03em;margin-top:1px;}
+  .nav-btn-main:hover .nav-icon-bubble{transform:translateY(-2px);}
   .nav-btn-main.active{color:var(--gold);}
+  .nav-btn-main.active .nav-icon-bubble{border-color:var(--gold);box-shadow:0 0 0 3px rgba(247,181,0,0.25);}
 
   /* ---------- Cash glance on home ---------- */
   .cash-glance{
-    background:rgba(63,181,121,0.15);border:2px solid #3fb579;border-radius:12px;
-    padding:10px 16px;text-align:center;min-width:90px;
+    background:linear-gradient(160deg, rgba(63,181,121,0.25), rgba(63,181,121,0.1));
+    border:2.5px solid #3fb579;border-radius:14px;
+    padding:12px 18px;text-align:center;min-width:100px;
+    box-shadow:0 3px 0 rgba(0,0,0,0.2), 0 0 18px rgba(63,181,121,0.25);
+    position:relative;
   }
-  .cash-glance-label{font-family:'Oswald',sans-serif;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.04em;color:#8fe0b3;}
-  .cash-glance-val{font-family:'Teko',sans-serif;font-weight:700;font-size:1.6rem;color:#5fd694;line-height:1.1;}
+  .cash-glance-label{font-family:'Oswald',sans-serif;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.04em;color:#8fe0b3;display:flex;align-items:center;justify-content:center;gap:4px;}
+  .cash-glance-coin{font-size:0.9rem;animation:coinSpin 2.8s linear infinite;display:inline-block;}
+  @keyframes coinSpin{0%{transform:rotateY(0);}50%{transform:rotateY(180deg);}100%{transform:rotateY(360deg);}}
+  .cash-glance-val{font-family:'Teko',sans-serif;font-weight:700;font-size:1.8rem;color:#5fd694;line-height:1.1;text-shadow:0 0 12px rgba(95,214,148,0.5);}
 
   /* ---------- Scoreboard strip ---------- */
   .bank-strip{
-    background:var(--navy);
-    border:3px solid var(--navy-dark);
-    border-radius:16px;
-    padding:16px 20px;margin-bottom:20px;box-shadow:var(--shadow);
-    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;
+    background:linear-gradient(135deg, var(--navy) 0%, #101b33 60%, var(--navy) 100%);
+    border:3px solid var(--gold);
+    border-radius:18px;
+    padding:18px 24px;margin-bottom:20px;
+    box-shadow:0 4px 0 rgba(0,0,0,0.3), 0 0 24px rgba(247,181,0,0.15), var(--shadow);
+    display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:32px;
+    position:relative;overflow:hidden;
   }
+  .bank-strip::before{
+    content:"";position:absolute;top:-60%;left:-20%;width:60%;height:220%;
+    background:linear-gradient(100deg, transparent, rgba(255,255,255,0.09), transparent);
+    animation:scoreboardSweep 4.5s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes scoreboardSweep{
+    0%{transform:translateX(0) rotate(12deg);}
+    50%{transform:translateX(420%) rotate(12deg);}
+    100%{transform:translateX(420%) rotate(12deg);}
+  }
+  .score-identity{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
+  .score-avatar{
+    width:54px;height:54px;border-radius:50%;flex:0 0 54px;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:800;font-family:'Teko',sans-serif;font-size:1.6rem;
+    box-shadow:0 0 0 3px rgba(255,255,255,0.15), 0 3px 0 rgba(0,0,0,0.3);
+    border:none;cursor:pointer;position:relative;padding:0;
+    transition:transform .12s ease;
+  }
+  .score-avatar:hover{transform:scale(1.05);}
+  .score-avatar:active{transform:scale(0.94);}
+  .switch-dot{
+    position:absolute;bottom:-3px;right:-3px;width:20px;height:20px;border-radius:50%;
+    background:var(--gold);color:var(--navy-dark);font-size:0.7rem;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 2px var(--navy);
+  }
+  .switch-list{display:flex;flex-direction:column;gap:8px;}
+  .switch-row{
+    display:flex;align-items:center;gap:12px;width:100%;
+    padding:10px 14px;border-radius:12px;border:2px solid var(--chalk-dim);
+    background:#fff;cursor:pointer;text-align:left;
+  }
+  .switch-row.active{border-color:var(--gold-dark);background:#fff8e6;}
+  .switch-row .kid-avatar-circle{width:38px;height:38px;font-size:1.1rem;flex:0 0 38px;}
+  .switch-name{flex:1;font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;font-size:0.85rem;color:var(--ink);}
+  .switch-check{color:var(--gold-dark);font-weight:800;font-size:1.1rem;}
+  .score-text-col{display:flex;flex-direction:column;align-items:flex-start;gap:6px;}
+  .score-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .bank-strip .who{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;font-size:0.85rem;color:var(--chalk-dim);}
+  .rank-badge{
+    display:inline-block;font-family:'Oswald',sans-serif;font-weight:700;font-size:0.6rem;
+    text-transform:uppercase;letter-spacing:0.04em;padding:2px 9px;border-radius:999px;
+  }
   .scoreboard{
     background:#050d1a;
-    border-radius:8px;
-    padding:8px 16px;
-    box-shadow:inset 0 0 0 2px rgba(255,255,255,0.06);
-    display:inline-block;
-    margin-top:4px;
+    border-radius:10px;
+    padding:6px 18px;
+    box-shadow:inset 0 0 0 2px rgba(255,255,255,0.08), inset 0 0 20px rgba(247,181,0,0.08);
+    display:flex;align-items:baseline;gap:8px;
+    position:relative;
+    z-index:1;
   }
   .scoreboard .digits{
-    font-family:'Teko',sans-serif;font-weight:700;font-size:2.4rem;
+    font-family:'Teko',sans-serif;font-weight:700;font-size:2.6rem;
     color:var(--gold);letter-spacing:0.02em;line-height:1;
-    text-shadow:0 0 10px rgba(247,181,0,0.5);
+    text-shadow:0 0 14px rgba(247,181,0,0.65), 0 0 3px rgba(247,181,0,0.9);
+    animation:digitGlow 2.2s ease-in-out infinite;
   }
-  .bank-strip .sub{font-size:0.75rem;color:var(--chalk-dim);margin-top:2px;font-family:'Inter';}
+  .digits-label{font-family:'Oswald',sans-serif;font-size:0.7rem;color:var(--chalk-dim);text-transform:uppercase;letter-spacing:0.03em;}
+  @keyframes digitGlow{
+    0%,100%{text-shadow:0 0 14px rgba(247,181,0,0.65), 0 0 3px rgba(247,181,0,0.9);}
+    50%{text-shadow:0 0 22px rgba(247,181,0,0.9), 0 0 5px rgba(247,181,0,1);}
+  }
+  .bank-strip .sub{font-size:0.75rem;color:var(--chalk-dim);font-family:'Inter';position:relative;z-index:1;}
+  .streak-badge{color:#ff8a00;font-weight:700;display:inline-block;animation:flameFlicker 1.2s ease-in-out infinite;}
+  @keyframes flameFlicker{0%,100%{transform:scale(1) rotate(-1deg);}50%{transform:scale(1.08) rotate(1deg);}}
 
   /* ---------- Toolbar ---------- */
   .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
@@ -357,6 +436,19 @@
   .swatch{width:32px;height:32px;border-radius:8px;cursor:pointer;border:3px solid transparent;}
   .swatch.selected{border-color:var(--navy);}
 
+  .avatar-pick-grid{
+    display:grid;grid-template-columns:repeat(6,1fr);gap:8px;
+    margin:10px 0 4px;
+  }
+  .avatar-pick-btn{
+    width:100%;aspect-ratio:1;border-radius:12px;
+    background:#fff;border:2.5px solid var(--chalk-dim);
+    font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:transform .12s ease, border-color .12s ease;
+  }
+  .avatar-pick-btn:hover{transform:translateY(-2px);}
+  .avatar-pick-btn.selected{border-color:var(--gold-dark);background:#fff8e6;box-shadow:0 0 0 2px rgba(247,181,0,0.3);}
+
   /* ---------- History / play-by-play ---------- */
   .history-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;}
   .history-row{display:flex;justify-content:space-between;align-items:center;padding:9px 11px;border-radius:8px;background:#fff;border:1.5px solid var(--chalk-dim);font-size:0.8rem;}
@@ -388,16 +480,97 @@
   .hist-tag.penalty{background:#fdecec;color:var(--red);}
   .hist-tag.redeem{background:#eef1fb;color:var(--blue,#2c6fe0);}
 
-  .streak-badge{color:#ff8a00;font-weight:700;}
+  .recap-card{
+    background:linear-gradient(135deg, #1a2947, #23325a);
+    border:3px solid #6b3fa0;border-radius:16px;
+    padding:16px 18px;margin-bottom:20px;
+    box-shadow:0 4px 0 rgba(0,0,0,0.25), var(--shadow);
+    position:relative;overflow:hidden;
+    transition:box-shadow .3s ease, border-color .3s ease;
+  }
+  .recap-card.record-glow{
+    border-color:var(--gold);
+    box-shadow:0 4px 0 rgba(0,0,0,0.25), 0 0 26px rgba(247,181,0,0.4), var(--shadow);
+    animation:recordCardPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes recordCardPulse{
+    0%,100%{box-shadow:0 4px 0 rgba(0,0,0,0.25), 0 0 20px rgba(247,181,0,0.3), var(--shadow);}
+    50%{box-shadow:0 4px 0 rgba(0,0,0,0.25), 0 0 34px rgba(247,181,0,0.55), var(--shadow);}
+  }
+  .recap-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;}
+  .recap-card-title{font-family:'Anton',sans-serif;letter-spacing:0.02em;font-size:1.05rem;color:#fff;}
+  .recap-see-all{color:#c9b8f0;text-decoration:underline;}
+  .recap-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .recap-stat-box{
+    background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 8px;text-align:center;
+  }
+  .recap-stat-label{font-family:'Oswald',sans-serif;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.04em;color:#b9c0d4;margin-bottom:2px;}
+  .recap-stat-num{font-family:'Teko',sans-serif;font-weight:700;font-size:1.7rem;color:#fff;line-height:1;}
+  .recap-stat-sub{font-size:0.68rem;color:#9aa4bd;margin-top:2px;font-family:'Inter';}
+  .recap-stat-sub.up{color:#5fd694;}
+  .recap-stat-sub.down{color:#ff8080;}
+  .new-record-banner{
+    margin-top:14px;text-align:center;font-family:'Anton',sans-serif;letter-spacing:0.01em;
+    font-size:0.95rem;color:var(--navy-dark);background:linear-gradient(90deg, var(--gold), #ffe17a, var(--gold));
+    background-size:200% 100%;
+    border-radius:10px;padding:10px 12px;
+    animation:recordBannerShine 2s linear infinite, recordCardPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes recordBannerShine{0%{background-position:0% 0;}100%{background-position:200% 0;}}
 
   .goal-card{
-    background:var(--paper,#fff);border:2px solid var(--navy);border-radius:14px;
-    padding:12px 16px;margin-bottom:20px;box-shadow:var(--shadow);
+    background:linear-gradient(135deg, #fff9e8, #fff);
+    border:3px solid var(--gold);border-radius:16px;
+    padding:16px;margin-bottom:20px;box-shadow:var(--shadow);
+    position:relative;overflow:hidden;
   }
-  .goal-head{display:flex;justify-content:space-between;align-items:center;font-family:'Oswald',sans-serif;font-size:0.82rem;color:var(--navy);margin-bottom:8px;flex-wrap:wrap;gap:6px;}
-  .goal-bar-track{width:100%;height:14px;background:var(--chalk-dim);border-radius:999px;overflow:hidden;}
-  .goal-bar-fill{height:100%;background:linear-gradient(90deg, var(--gold), var(--gold-dark));border-radius:999px;transition:width .3s ease;}
-  .goal-reached{margin-top:8px;font-family:'Oswald',sans-serif;font-weight:700;font-size:0.8rem;color:var(--gold-dark);}
+  .goal-card::before{
+    content:"";position:absolute;top:-30px;right:-30px;width:100px;height:100px;
+    background:radial-gradient(circle, rgba(247,181,0,0.18), transparent 70%);
+    pointer-events:none;
+  }
+  .goal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;position:relative;}
+  .goal-emoji-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:0.9rem;color:var(--navy);}
+  .goal-emoji-title strong{color:var(--gold-dark);}
+  .goal-pct-badge{
+    font-family:'Teko',sans-serif;font-weight:700;font-size:1.3rem;
+    background:var(--navy);color:var(--gold);padding:2px 12px;border-radius:999px;
+    box-shadow:0 2px 0 var(--navy-dark);
+  }
+  .goal-track{
+    position:relative;height:34px;background:#eef0e6;border-radius:999px;
+    margin:20px 4px 8px;box-shadow:inset 0 2px 4px rgba(0,0,0,0.12);
+  }
+  .goal-track-fill{
+    position:absolute;left:0;top:0;bottom:0;border-radius:999px;
+    background:linear-gradient(90deg, #ffd75e, var(--gold-dark));
+    transition:width .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  .goal-checkpoint{
+    position:absolute;top:50%;width:8px;height:8px;border-radius:50%;
+    background:#fff;border:2px solid var(--chalk-dim);
+    transform:translate(-50%,-50%);z-index:2;
+  }
+  .goal-runner{
+    position:absolute;top:50%;font-size:1.6rem;line-height:1;
+    transform:translate(-50%,-50%) scaleX(-1);
+    transition:left .5s cubic-bezier(.34,1.56,.64,1);
+    filter:drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+    z-index:3;
+  }
+  .goal-runner.at-finish{transform:translate(-50%,-50%) scaleX(1);}
+  .goal-finish-flag{
+    position:absolute;right:-6px;top:50%;transform:translateY(-50%);
+    font-size:1.5rem;z-index:1;
+  }
+  .goal-foot{display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;color:var(--ink-soft);font-family:'Inter';flex-wrap:wrap;gap:6px;}
+  .goal-remaining{font-weight:700;color:var(--gold-dark);}
+  .goal-reached{
+    margin-top:12px;text-align:center;font-family:'Anton',sans-serif;letter-spacing:0.02em;
+    font-size:1.1rem;color:var(--gold-dark);
+    animation:goalPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes goalPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.04);}}
   .goal-inline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:0.85rem;margin-bottom:12px;}
 
   .rewards-shop{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
@@ -500,26 +673,24 @@
     <button class="btn ghost" id="lockBtn" title="Parent lock">🔒</button>
   </header>
 
-  <div class="kid-row" id="kidRow"></div>
-
   <div id="mainArea"></div>
 </div>
 
 <nav class="bottom-nav">
   <button class="nav-btn-main active" id="navHome">
-    <span class="nav-icon">🏠</span><span class="nav-label">Home</span>
+    <span class="nav-icon-bubble">🏠</span><span class="nav-label">Home</span>
   </button>
   <button class="nav-btn-main" id="navPoints">
-    <span class="nav-icon">🏅</span><span class="nav-label">Points</span>
+    <span class="nav-icon-bubble">🏅</span><span class="nav-label">Points</span>
   </button>
   <button class="nav-btn-main" id="navCash">
-    <span class="nav-icon">💵</span><span class="nav-label">Cash</span>
+    <span class="nav-icon-bubble">💵</span><span class="nav-label">Cash</span>
   </button>
   <button class="nav-btn-main" id="navRecap">
-    <span class="nav-icon">🏆</span><span class="nav-label">Recap</span>
+    <span class="nav-icon-bubble">🏆</span><span class="nav-label">Recap</span>
   </button>
   <button class="nav-btn-main" id="navMore">
-    <span class="nav-icon">⚙️</span><span class="nav-label">More</span>
+    <span class="nav-icon-bubble">⚙️</span><span class="nav-label">More</span>
   </button>
 </nav>
 
@@ -533,6 +704,11 @@
 <!-- Add kid sheet -->
 <div class="overlay" id="kidOverlay">
   <div class="sheet" id="kidSheet"></div>
+</div>
+
+<!-- Player switcher (compact) -->
+<div class="overlay" id="switchOverlay">
+  <div class="sheet" id="switchSheet"></div>
 </div>
 
 <!-- Points sheet -->
@@ -562,23 +738,21 @@
 
 <script>
 const KID_COLORS = ['#1a2947','#e8433a','#f7b500','#1f7a4d','#6b3fa0','#0e7c86','#e2711d'];
+const KID_AVATARS = ['🦁','🐯','🐻','🐼','🦊','🐸','🐵','🦄','🐲','🦖','🚀','⚡','🔥','⭐','🎮','🏀','⚽','🏈','🎸','🥷','🦈','🐙','🐨','🐰'];
 const POINT_VALUE = 0.5; // dollars per point
 const STORAGE_KEY = 'family-chore-state-league';
 
 const DEFAULT_CHORES = [
-  {name:'Eat healthy w/ no fight', points:2},
-  {name:'Sleep in own bed', points:2},
-  {name:'Wake up with no fighting (school)', points:2},
-  {name:'Workout', points:2},
-  {name:'Do not eat the blanket', points:3},
-  {name:'Make bed', points:1},
-  {name:'Pick up clothes', points:1},
-  {name:'Clean room', points:3},
-  {name:'Dust', points:0.5},
-  {name:'Feed dog', points:0.5},
-  {name:'Wash dishes', points:0.5},
-  {name:'Take out garbage', points:0.5},
   {name:'Read', points:0.5},
+  {name:'Positive attitude in sports', points:1},
+  {name:'Set clothes for school', points:0.3},
+  {name:'Set up lunch for school', points:0.3},
+  {name:'Vacuum TV room and bedroom', points:0.5},
+  {name:'Brush teeth twice a day', points:0.5},
+  {name:'Floss', points:0.5},
+  {name:'Take a shower after school', points:0.5},
+  {name:'Put school items away as soon as you get home from school', points:0.5},
+  {name:'Homework', points:0.3},
 ];
 
 const DEFAULT_REWARDS = [
@@ -763,34 +937,75 @@ function pointsInRange(kidId, start, end){
   return {total, best};
 }
 
+function bestDayAllTime(kidId, excludeStart, excludeEnd){
+  const days = state.days[kidId] || {};
+  let best = {date:null, pts:0};
+  Object.keys(days).forEach(dstr=>{
+    const rec = days[dstr];
+    if(!rec.approved) return;
+    if(excludeStart && excludeEnd){
+      const [y,m,d] = dstr.split('-').map(Number);
+      const dt = new Date(y, m-1, d);
+      if(dt >= excludeStart && dt <= excludeEnd) return;
+    }
+    const pts = awardedPointsForDay(rec, dstr);
+    if(pts > best.pts){ best = {date:dstr, pts}; }
+  });
+  return best;
+}
+
 function getKid(id){ return state.kids.find(k=>k.id===id); }
 function jerseyNum(id){ const i = state.kids.findIndex(k=>k.id===id); return i>=0? i+1 : 1; }
+function kidAvatarDisplay(k){ return k.avatar || jerseyNum(k.id); }
+
+function getRank(totalPts){
+  if(totalPts >= 100) return {label:'🏆 CHAMPION', bg:'#f7b500', color:'#1a2947'};
+  if(totalPts >= 50) return {label:'⭐ ALL-STAR', bg:'#8a4fe0', color:'#fff'};
+  if(totalPts >= 20) return {label:'🔥 STARTER', bg:'#e8433a', color:'#fff'};
+  if(totalPts >= 5) return {label:'🌱 ROOKIE', bg:'#1f7a4d', color:'#fff'};
+  return {label:'🆕 NEW PLAYER', bg:'#4a5877', color:'#fff'};
+}
 
 /* ---------------- RENDER ---------------- */
 function render(){
-  renderKidRow();
   renderMain();
 }
 
-function renderKidRow(){
-  const row = document.getElementById('kidRow');
-  row.innerHTML = '';
+function openKidSwitcher(){
+  if(state.kids.length < 2){
+    openAddKid();
+    return;
+  }
+  const overlay = document.getElementById('switchOverlay');
+  overlay.classList.add('open');
+  renderSwitchSheet();
+  overlay.onclick = (e)=>{ if(e.target===overlay) closeOverlay('switchOverlay'); };
+}
+
+function renderSwitchSheet(){
+  const sheet = document.getElementById('switchSheet');
+  sheet.innerHTML = `
+    <div class="sheet-head">
+      <div class="sheet-title">SWITCH PLAYER</div>
+      <button class="close-x" onclick="closeOverlay('switchOverlay')">✕</button>
+    </div>
+    <div class="switch-list" id="switchList"></div>
+    <button class="btn small ghost" id="switchAddBtn" style="margin-top:12px;width:100%;">+ Add another player</button>
+  `;
+  const list = document.getElementById('switchList');
   state.kids.forEach(k=>{
     ensureKidData(k.id);
-    const btn = document.createElement('button');
-    btn.className = 'kid-avatar-btn' + (k.id===currentKidId?' active':'');
-    btn.innerHTML = `
-      <span class="kid-avatar-circle" style="background:${k.color}">${jerseyNum(k.id)}</span>
-      <span class="kid-avatar-name">${escapeHtml(k.name)}</span>
+    const row = document.createElement('button');
+    row.className = 'switch-row' + (k.id===currentKidId ? ' active' : '');
+    row.innerHTML = `
+      <span class="kid-avatar-circle" style="background:${k.color}">${kidAvatarDisplay(k)}</span>
+      <span class="switch-name">${escapeHtml(k.name)}</span>
+      ${k.id===currentKidId ? '<span class="switch-check">✓</span>' : ''}
     `;
-    btn.onclick = ()=>{ currentKidId = k.id; render(); };
-    row.appendChild(btn);
+    row.onclick = ()=>{ currentKidId = k.id; closeOverlay('switchOverlay'); render(); };
+    list.appendChild(row);
   });
-  const addBtn = document.createElement('button');
-  addBtn.className = 'kid-avatar-btn add';
-  addBtn.innerHTML = `<span class="kid-avatar-circle add-circle">+</span><span class="kid-avatar-name">Add</span>`;
-  addBtn.onclick = openAddKid;
-  row.appendChild(addBtn);
+  document.getElementById('switchAddBtn').onclick = ()=>{ closeOverlay('switchOverlay'); openAddKid(); };
 }
 
 function renderMain(){
@@ -808,7 +1023,29 @@ function renderMain(){
 
   const streak = computeStreak(kid.id);
   const goal = bank.goal;
+  const rank = getRank(bank.total);
   const goalPct = goal && goal.target > 0 ? Math.min(100, Math.round((bank.total/goal.target)*100)) : 0;
+  if(goal && goalPct >= 100 && !goal.celebrated){
+    goal.celebrated = true;
+    saveState();
+    setTimeout(()=>fireConfetti(kid.color), 300);
+  }
+  if(goal && goalPct < 100 && goal.celebrated){
+    goal.celebrated = false;
+  }
+
+  const thisWeekRange = weekRange(0);
+  const lastWeekRange = weekRange(1);
+  const thisWeekStats = pointsInRange(kid.id, thisWeekRange.start, thisWeekRange.end);
+  const lastWeekStats = pointsInRange(kid.id, lastWeekRange.start, lastWeekRange.end);
+  const weekDiff = thisWeekStats.total - lastWeekStats.total;
+  const priorBest = bestDayAllTime(kid.id, thisWeekRange.start, thisWeekRange.end);
+  const isNewRecord = thisWeekStats.best.pts > 0 && thisWeekStats.best.pts > priorBest.pts;
+  if(isNewRecord && kid.lastCelebratedRecordDate !== thisWeekStats.best.date){
+    kid.lastCelebratedRecordDate = thisWeekStats.best.date;
+    saveState();
+    setTimeout(()=>fireConfetti(kid.color), 500);
+  }
 
   main.innerHTML = `
     ${overdue ? `
@@ -820,25 +1057,73 @@ function renderMain(){
       </span>
     </div>` : ''}
     <div class="bank-strip">
-      <div>
-        <div class="who">${escapeHtml(kid.name)}'s Scoreboard</div>
-        <div class="scoreboard"><div class="digits">${fmtPts(bank.total)}</div></div>
-        <div class="sub">pts ${streak > 0 ? `&middot; <span class="streak-badge">🔥 ${streak} day streak</span>` : ''}</div>
+      <div class="score-identity">
+        <button class="score-avatar" style="background:${kid.color}" id="scoreAvatarBtn" title="${state.kids.length>1?'Switch player':'Add another player'}">
+          ${kidAvatarDisplay(kid)}
+          ${state.kids.length>1 ? '<span class="switch-dot">⇄</span>' : ''}
+        </button>
+        <div class="score-text-col">
+          <div class="score-name-row">
+            <span class="who">${escapeHtml(kid.name)}</span>
+            <span class="rank-badge" style="background:${rank.bg};color:${rank.color};">${rank.label}</span>
+          </div>
+          <div class="scoreboard"><div class="digits">${fmtPts(bank.total)}</div><div class="digits-label">pts</div></div>
+          ${streak > 0 ? `<div class="sub"><span class="streak-badge">🔥 ${streak} day streak</span></div>` : ''}
+        </div>
       </div>
       <div class="cash-glance">
-        <div class="cash-glance-label">💵 Cash</div>
+        <div class="cash-glance-label"><span class="cash-glance-coin">🪙</span> Cash</div>
         <div class="cash-glance-val">${fmtMoney2(state.bank[kid.id].cash.total)}</div>
       </div>
+    </div>
+
+    <div class="recap-card${isNewRecord ? ' record-glow' : ''}">
+      <div class="recap-card-head">
+        <span class="recap-card-title">📊 This Week</span>
+        <button class="mini-link recap-see-all" id="seeFullRecap">Full recap &amp; leaderboard ›</button>
+      </div>
+      <div class="recap-stat-grid">
+        <div class="recap-stat-box">
+          <div class="recap-stat-label">This week</div>
+          <div class="recap-stat-num">${fmtPts(thisWeekStats.total)}</div>
+          <div class="recap-stat-sub ${weekDiff>=0?'up':'down'}">${weekDiff>=0?'▲':'▼'} ${fmtPts(Math.abs(weekDiff))} vs last week</div>
+        </div>
+        <div class="recap-stat-box">
+          <div class="recap-stat-label">Best day</div>
+          <div class="recap-stat-num">${thisWeekStats.best.date ? fmtPts(thisWeekStats.best.pts) : '—'}</div>
+          <div class="recap-stat-sub">${thisWeekStats.best.date ? shortDate(thisWeekStats.best.date) : 'No games yet'}</div>
+        </div>
+        <div class="recap-stat-box">
+          <div class="recap-stat-label">Streak</div>
+          <div class="recap-stat-num">${streak}</div>
+          <div class="recap-stat-sub">day${streak===1?'':'s'} 🔥</div>
+        </div>
+      </div>
+      ${isNewRecord ? `
+        <div class="new-record-banner">
+          🎉 NEW HIGH SCORE! ${fmtPts(thisWeekStats.best.pts)} pts beats the old best of ${fmtPts(priorBest.pts)} pts!
+        </div>` : ''}
     </div>
 
     ${goal ? `
     <div class="goal-card">
       <div class="goal-head">
-        <span>🎯 Saving for: <strong>${escapeHtml(goal.name)}</strong></span>
-        <span>${fmtPts(Math.min(bank.total,goal.target))}/${fmtPts(goal.target)} pts</span>
+        <span class="goal-emoji-title">🎯 Saving for <strong>${escapeHtml(goal.name)}</strong></span>
+        <span class="goal-pct-badge">${goalPct}%</span>
       </div>
-      <div class="goal-bar-track"><div class="goal-bar-fill" style="width:${goalPct}%;"></div></div>
-      ${goalPct>=100 ? `<div class="goal-reached">🎉 Goal reached! Time to redeem it.</div>` : ''}
+      <div class="goal-track">
+        <div class="goal-track-fill" style="width:${goalPct}%;"></div>
+        <div class="goal-checkpoint" style="left:25%;"></div>
+        <div class="goal-checkpoint" style="left:50%;"></div>
+        <div class="goal-checkpoint" style="left:75%;"></div>
+        <div class="goal-runner${goalPct>=100 ? ' at-finish' : ''}" style="left:${goalPct}%;">${goalPct>=100 ? '🎉' : '🏃'}</div>
+        <div class="goal-finish-flag">🏆</div>
+      </div>
+      <div class="goal-foot">
+        <span>${fmtPts(Math.min(bank.total,goal.target))} / ${fmtPts(goal.target)} pts</span>
+        ${goalPct<100 ? `<span class="goal-remaining">${fmtPts(goal.target-bank.total)} pts to go!</span>` : ''}
+      </div>
+      ${goalPct>=100 ? `<div class="goal-reached">🎉 GOAL REACHED! Go redeem it! 🎉</div>` : ''}
     </div>` : ''}
 
     <div class="toolbar">
@@ -861,6 +1146,8 @@ function renderMain(){
     document.getElementById('bannerDismissBtn').onclick = ()=>{ bannerDismissed = true; render(); };
   }
 
+  document.getElementById('scoreAvatarBtn').onclick = openKidSwitcher;
+  document.getElementById('seeFullRecap').onclick = ()=>{ openRecap(); setActiveNav('navRecap'); };
   document.getElementById('prevMonth').onclick = ()=>{ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderMain(); };
   document.getElementById('nextMonth').onclick = ()=>{ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderMain(); };
   document.getElementById('todayBtn').onclick = ()=>{ const n=new Date(); calMonth=n.getMonth(); calYear=n.getFullYear(); renderMain(); };
@@ -1138,46 +1425,73 @@ function fireConfetti(color){
 }
 
 /* ---------------- ADD KID ---------------- */
-function openAddKid(){
+function openAddKid(existingKid){
   const overlay = document.getElementById('kidOverlay');
   overlay.classList.add('open');
   const usedColors = state.kids.map(k=>k.color);
-  const firstFree = KID_COLORS.find(c=>!usedColors.includes(c)) || KID_COLORS[0];
+  const firstFreeColor = KID_COLORS.find(c=>!usedColors.includes(c)) || KID_COLORS[0];
+  const usedAvatars = state.kids.map(k=>k.avatar).filter(Boolean);
+  const firstFreeAvatar = KID_AVATARS.find(a=>!usedAvatars.includes(a)) || KID_AVATARS[0];
+  const isEdit = !!existingKid;
   const sheet = document.getElementById('kidSheet');
   sheet.innerHTML = `
     <div class="sheet-head">
-      <div class="sheet-title">ADD PLAYER</div>
+      <div class="sheet-title">${isEdit ? 'EDIT PLAYER' : 'ADD PLAYER'}</div>
       <button class="close-x" onclick="closeOverlay('kidOverlay')">✕</button>
     </div>
     <span class="field-label">Name</span>
-    <input type="text" id="kidNameInput" placeholder="e.g. Max" style="width:100%;margin-bottom:14px;" maxlength="24">
-    <span class="field-label">Jersey color</span>
+    <input type="text" id="kidNameInput" placeholder="e.g. Max" style="width:100%;margin-bottom:14px;" maxlength="24" value="${isEdit ? escapeHtml(existingKid.name) : ''}">
+    <span class="field-label">Pick an avatar</span>
+    <div class="avatar-pick-grid" id="avatarPickGrid"></div>
+    <span class="field-label" style="margin-top:14px;display:block;">Jersey color</span>
     <div class="swatch-row" id="swatchRow"></div>
     <div class="footer-actions">
-      <button class="btn primary" id="saveKidBtn">Add to roster</button>
+      <button class="btn primary" id="saveKidBtn">${isEdit ? 'Save changes' : 'Add to roster'}</button>
     </div>
   `;
-  let selected = firstFree;
+  let selectedColor = isEdit ? existingKid.color : firstFreeColor;
+  let selectedAvatar = isEdit ? (existingKid.avatar || firstFreeAvatar) : firstFreeAvatar;
+
+  const avatarGrid = document.getElementById('avatarPickGrid');
+  KID_AVATARS.forEach(a=>{
+    const btn = document.createElement('button');
+    btn.className = 'avatar-pick-btn' + (a===selectedAvatar ? ' selected' : '');
+    btn.textContent = a;
+    btn.onclick = ()=>{ selectedAvatar=a; [...avatarGrid.children].forEach(c=>c.classList.remove('selected')); btn.classList.add('selected'); };
+    avatarGrid.appendChild(btn);
+  });
+
   const swatchRow = document.getElementById('swatchRow');
   KID_COLORS.forEach(c=>{
     const sw = document.createElement('div');
-    sw.className = 'swatch' + (c===selected?' selected':'');
+    sw.className = 'swatch' + (c===selectedColor?' selected':'');
     sw.style.background = c;
-    sw.onclick = ()=>{ selected=c; [...swatchRow.children].forEach(s=>s.classList.remove('selected')); sw.classList.add('selected'); };
+    sw.onclick = ()=>{ selectedColor=c; [...swatchRow.children].forEach(s=>s.classList.remove('selected')); sw.classList.add('selected'); };
     swatchRow.appendChild(sw);
   });
+
   document.getElementById('saveKidBtn').onclick = ()=>{
     const name = document.getElementById('kidNameInput').value.trim();
     if(!name){ showToast('Give this player a name'); return; }
-    const id = uid();
-    state.kids.push({id, name, color:selected});
-    state.bank[id] = {total:0, history:[]};
-    state.days[id] = {};
-    currentKidId = id;
-    saveState();
-    closeOverlay('kidOverlay');
-    render();
-    showToast(`${name} joins the team!`);
+    if(isEdit){
+      existingKid.name = name;
+      existingKid.color = selectedColor;
+      existingKid.avatar = selectedAvatar;
+      saveState();
+      closeOverlay('kidOverlay');
+      render();
+      showToast(`${name} updated!`);
+    } else {
+      const id = uid();
+      state.kids.push({id, name, color:selectedColor, avatar:selectedAvatar});
+      state.bank[id] = {total:0, history:[]};
+      state.days[id] = {};
+      currentKidId = id;
+      saveState();
+      closeOverlay('kidOverlay');
+      render();
+      showToast(`${name} joins the team!`);
+    }
   };
   overlay.onclick = (e)=>{ if(e.target===overlay) closeOverlay('kidOverlay'); };
 }
@@ -1542,7 +1856,7 @@ function renderRecapSheet(){
       ${leaderboard.map((entry,i)=>`
         <li class="leaderboard-row ${entry.kid.id===kid.id?'me':''}">
           <span class="lb-rank">#${i+1}</span>
-          <span class="jersey" style="background:${entry.kid.color};width:26px;height:26px;font-size:0.85rem;">${jerseyNum(entry.kid.id)}</span>
+          <span class="jersey" style="background:${entry.kid.color};width:26px;height:26px;font-size:0.85rem;">${kidAvatarDisplay(entry.kid)}</span>
           <span class="lb-name">${escapeHtml(entry.kid.name)}</span>
           <span class="lb-pts">${fmtPts(entry.pts)} pts</span>
         </li>`).join('')}
@@ -1551,11 +1865,19 @@ function renderRecapSheet(){
 }
 
 /* ---------------- SETTINGS SHEET (playbook + roster) ---------------- */
-document.getElementById('navHome').onclick = ()=>{ closeOverlay('dayOverlay'); closeOverlay('bankOverlay'); closeOverlay('cashOverlay'); closeOverlay('recapOverlay'); closeOverlay('settingsOverlay'); };
-document.getElementById('navPoints').onclick = ()=>{ if(currentKidId) openBank(currentKidId); else showToast('Add a player first'); };
-document.getElementById('navCash').onclick = ()=>{ if(currentKidId) openCash(currentKidId); else showToast('Add a player first'); };
-document.getElementById('navRecap').onclick = ()=>{ if(currentKidId) openRecap(); else showToast('Add a player first'); };
-document.getElementById('navMore').onclick = ()=>requirePin(openSettings);
+function setActiveNav(id){
+  document.querySelectorAll('.nav-btn-main').forEach(btn=>btn.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el) el.classList.add('active');
+}
+document.getElementById('navHome').onclick = ()=>{
+  closeOverlay('dayOverlay'); closeOverlay('bankOverlay'); closeOverlay('cashOverlay'); closeOverlay('recapOverlay'); closeOverlay('settingsOverlay');
+  setActiveNav('navHome');
+};
+document.getElementById('navPoints').onclick = ()=>{ if(currentKidId){ openBank(currentKidId); setActiveNav('navPoints'); } else showToast('Add a player first'); };
+document.getElementById('navCash').onclick = ()=>{ if(currentKidId){ openCash(currentKidId); setActiveNav('navCash'); } else showToast('Add a player first'); };
+document.getElementById('navRecap').onclick = ()=>{ if(currentKidId){ openRecap(); setActiveNav('navRecap'); } else showToast('Add a player first'); };
+document.getElementById('navMore').onclick = ()=>requirePin(()=>{ openSettings(); setActiveNav('navMore'); });
 function openSettings(){
   const overlay = document.getElementById('settingsOverlay');
   overlay.classList.add('open');
@@ -1719,11 +2041,16 @@ function renderSettingsSheet(){
     const row = document.createElement('div');
     row.className = 'kid-manage-row';
     row.innerHTML = `
-      <span class="jersey" style="background:${k.color}">${jerseyNum(k.id)}</span>
+      <span class="jersey" style="background:${k.color}">${kidAvatarDisplay(k)}</span>
       <span class="name">${escapeHtml(k.name)}</span>
+      <button class="chore-del" id="editKid_${k.id}" title="Edit avatar/name">✏️</button>
       <button class="chore-del" title="Remove player">🗑</button>
     `;
-    row.querySelector('.chore-del').onclick = ()=>{
+    row.querySelector(`#editKid_${k.id}`).onclick = ()=>{
+      closeOverlay('settingsOverlay');
+      openAddKid(k);
+    };
+    row.querySelector('.chore-del[title="Remove player"]').onclick = ()=>{
       if(confirm(`Remove ${k.name} from the roster? Their point history will be lost.`)){
         state.kids = state.kids.filter(x=>x.id!==k.id);
         delete state.bank[k.id];
@@ -1970,6 +2297,7 @@ document.getElementById('lockBtn').onclick = ()=>{
 /* ---------------- helpers ---------------- */
 function closeOverlay(id){
   document.getElementById(id).classList.remove('open');
+  if(typeof setActiveNav === 'function') setActiveNav('navHome');
 }
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
